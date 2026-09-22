@@ -1,0 +1,2795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codex Bestiarum — A Mythic Card Battle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-midnight: #0e0c0a;
+  --bg-tome: #181410;
+  --bg-surface: #221c17;
+  --bg-surface-elevated: #2e261f;
+  --parchment: #f0e6cf;
+  --parchment-muted: #c8b99d;
+  --ink: #f5eedb;
+  --ink-soft: #b8a990;
+  --gilt: #d4a34b;
+  --gilt-bright: #fbbf24;
+  --gilt-glow: rgba(251, 191, 36, 0.25);
+  --wax-red: #991b1b;
+  --wax-red-bright: #ef4444;
+  --gem-cyan: #22d3ee;
+  --gem-blue: #0284c7;
+  --xp-purple: #9333ea;
+  --xp-purple-bright: #c084fc;
+  --fire: #e11d48;
+  --water: #0284c7;
+  --grass: #16a34a;
+  --storm: #9333ea;
+  --earth: #ca8a04;
+  --dark: #6366f1;
+  --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+  --font-body: 'Crimson Text', Georgia, 'Times New Roman', serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; min-height: 100%; }
+
+/* ---------- Global Arcane Night Background ---------- */
+body {
+  background-color: var(--bg-midnight);
+  background-image:
+    radial-gradient(ellipse 900px 600px at 50% 0%, rgba(212, 163, 75, 0.12), transparent 70%),
+    radial-gradient(circle at 15% 20%, rgba(147, 51, 234, 0.08), transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.08), transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(225, 29, 72, 0.06), transparent 50%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.85) 100%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 12px);
+  background-attachment: fixed;
+  font-family: var(--font-body);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+.screen {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 2rem 1.25rem 3rem; animation: fadeIn 0.4s ease; margin: 0 auto; width: 100%;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+:focus-visible { outline: 3px solid var(--gilt-bright); outline-offset: 2px; }
+button { font: inherit; }
+
+/* ---------- Storage Banner ---------- */
+.storage-warning-banner {
+  width: 100%; background: #450a0a; border-bottom: 2px solid #ef4444; color: #fca5a5;
+  font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; text-align: center;
+  padding: 0.5rem 1rem; z-index: 100;
+}
+
+/* ---------- Type Seals & Models ---------- */
+.type-seal {
+  --seal-size: 40px; width: var(--seal-size); height: var(--seal-size);
+  border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  border: 2px solid var(--gilt); box-shadow: 0 0 10px rgba(0,0,0,0.8), inset 0 0 6px rgba(255,255,255,0.25);
+  flex-shrink: 0; color: #fff;
+}
+.type-seal svg { width: 58%; height: 58%; fill: #fff; stroke: none; }
+.type-seal--grass svg { fill: none; stroke: #fff !important; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.type-seal--fire { background: linear-gradient(135deg, #e11d48, #881337); border-color: #fda4af; box-shadow: 0 0 12px rgba(225,29,72,0.45); }
+.type-seal--water { background: linear-gradient(135deg, #0284c7, #0c4a6e); border-color: #7dd3fc; box-shadow: 0 0 12px rgba(2,132,199,0.45); }
+.type-seal--grass { background: linear-gradient(135deg, #16a34a, #14532d); border-color: #86efac; box-shadow: 0 0 12px rgba(22,163,74,0.45); }
+.type-seal--storm { background: linear-gradient(135deg, #9333ea, #581c87); border-color: #d8b4fe; box-shadow: 0 0 12px rgba(147,51,234,0.45); }
+.type-seal--earth { background: linear-gradient(135deg, #ca8a04, #713f12); border-color: #fde047; box-shadow: 0 0 12px rgba(202,138,4,0.45); }
+.type-seal--dark { background: linear-gradient(135deg, #4338ca, #180828); border-color: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,0.55); }
+
+.creature-model { width: 100%; height: 84px; display: flex; align-items: center; justify-content: center; margin: 0.1rem 0 0.3rem; }
+.creature-model svg { width: 78px; height: 78px; overflow: visible; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.7)); }
+.creature-model svg polygon, .creature-model svg ellipse, .creature-model svg rect, .creature-model svg circle, .creature-model svg path {
+  stroke: #120e0b; stroke-width: 1.5; stroke-linejoin: round; fill: var(--ink-soft);
+}
+.type-fire .creature-model svg > * { fill: #f43f5e; }
+.type-water .creature-model svg > * { fill: #38bdf8; }
+.type-grass .creature-model svg > * { fill: #4ade80; }
+.type-storm .creature-model svg > * { fill: #c084fc; }
+.type-earth .creature-model svg > * { fill: #eab308; }
+.type-dark .creature-model svg > * { fill: #a78bfa; }
+.creature-model svg .model-accent { fill: #fff !important; }
+.creature-model svg .model-dark { fill: #0e0c0a !important; stroke: none; }
+.mon-panel .creature-model { height: 100px; }
+.mon-panel .creature-model svg { width: 92px; height: 92px; }
+
+/* ---------- Title & Frame ---------- */
+.title-screen, .difficulty-screen { justify-content: center; text-align: center; width: 100%; max-width: 100%; min-height: 100vh; padding: 1.5rem; }
+.title-frame {
+  width: 100%; max-width: 100%; min-height: calc(100vh - 3rem);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  background: radial-gradient(circle at 50% 25%, #241e17 0%, #17130e 75%, #0f0c09 100%);
+  border: 2px solid var(--gilt); outline: 1px solid rgba(212,163,75,0.35);
+  outline-offset: -6px; border-radius: 12px 32px 12px 32px; padding: 2.5rem 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.85), inset 0 0 40px rgba(0,0,0,0.6);
+}
+.eyebrow { font-family: var(--font-display); letter-spacing: 0.25em; text-transform: uppercase; font-size: 0.75rem; color: var(--gilt-bright); margin: 0 0 0.75rem; text-shadow: 0 0 10px rgba(251,191,36,0.4); }
+.game-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(2.4rem, 6vw, 3.8rem); letter-spacing: 0.04em; margin: 0 0 1rem; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(212,163,75,0.35); }
+.game-title::first-letter { color: var(--gilt-bright); font-size: 1.15em; text-shadow: 0 0 20px rgba(251,191,36,0.6); }
+.title-blurb { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.6; color: var(--parchment-muted); margin: 0 0 1.5rem; max-width: 700px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+.guide-heading { font-family: var(--font-display); font-size: 1.2rem; text-align: center; margin: 0 0 0.8rem; color: var(--gilt-bright); }
+.title-buttons { display: flex; flex-direction: column; gap: 0.7rem; align-items: center; justify-content: center; margin-top: 1rem; width: 100%; }
+.title-buttons-row { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+.reset-btn-title { background: linear-gradient(180deg, #3f3f46, #18181b) !important; color: #d4d4d8 !important; border-color: #52525b !important; }
+.boss-btn-title { background: linear-gradient(180deg, #581c87, #2e1065) !important; color: #f3e8ff !important; border-color: #c084fc !important; box-shadow: 0 3px 0 #1e1b4b, 0 0 14px rgba(192,132,252,0.4) !important; }
+.boss-btn-title:hover:not(:disabled) { box-shadow: 0 3px 0 #1e1b4b, 0 0 20px rgba(192,132,252,0.8) !important; }
+
+/* ---------- Badges & Bars ---------- */
+.player-identity-bar {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem; background: rgba(0,0,0,0.45);
+  border: 1px solid var(--gilt); border-radius: 16px; padding: 0.6rem 1.2rem; margin-bottom: 0.8rem;
+  font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--ink); max-width: 480px; width: 100%;
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
+}
+.player-identity-top { display: flex; align-items: center; justify-content: center; gap: 0.6rem; flex-wrap: wrap; }
+.player-name-highlight { color: var(--gilt-bright); font-weight: 900; }
+
+.level-badge {
+  padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.82rem; letter-spacing: 0.05em; text-transform: uppercase;
+  font-weight: 800; display: inline-flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+.level-badge.level-tier-1 { background: linear-gradient(180deg, #0284c7, #0369a1); color: #f0f9ff; border: 1px solid #38bdf8; }
+.level-badge.level-tier-2 { background: linear-gradient(180deg, #7e22ce, #581c87); color: #faf5ff; border: 1px solid #c084fc; }
+.level-badge.level-tier-3 { background: linear-gradient(180deg, #b91c1c, #7f1d1d); color: #fef2f2; border: 1px solid #f87171; }
+.level-badge.level-tier-4 { background: linear-gradient(180deg, #15803d, #14532d); color: #f0fdf4; border: 1px solid #4ade80; }
+.level-badge.level-tier-5 { background: linear-gradient(180deg, #ca8a04, #854d0e); color: #fefce8; border: 1px solid #fde047; }
+
+.player-xp-container { width: 100%; display: flex; flex-direction: column; gap: 0.2rem; align-items: center; }
+.player-xp-track { width: 100%; max-width: 320px; height: 9px; background: #181410; border-radius: 5px; overflow: hidden; border: 1px solid rgba(212,163,75,0.4); }
+.player-xp-fill { height: 100%; background: linear-gradient(90deg, #9333ea, #6366f1); transition: width 0.3s ease; box-shadow: 0 0 8px rgba(147,51,234,0.6); }
+.player-xp-label { font-size: 0.75rem; color: var(--parchment-muted); font-family: var(--font-display); }
+
+.edit-name-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid var(--gilt); border-radius: 12px; padding: 0.15rem 0.55rem;
+  font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; color: var(--parchment-muted);
+  cursor: pointer; transition: all 0.15s ease;
+}
+.edit-name-btn:hover { background: var(--gilt); color: #000; }
+
+.currency-bar { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.gold-badge, .gem-badge {
+  font-family: var(--font-display); font-size: 1.15rem; font-weight: bold; padding: 0.45em 1.2em;
+  border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.gold-badge { color: var(--gilt-bright); text-shadow: 0 1px 2px #000; background: linear-gradient(180deg, #241a0d, #140d05); border: 2px solid var(--gilt); }
+.gem-badge { color: #a5f3fc; text-shadow: 0 1px 2px #000; background: linear-gradient(180deg, #0e7490, #083344); border: 2px solid #38bdf8; }
+
+/* ---------- Difficulty Mode Cards ---------- */
+.difficulty-options { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; width: 100%; max-width: 820px; margin: 1.5rem 0 2rem; }
+.difficulty-card {
+  flex: 1 1 320px; max-width: 380px; background: rgba(30, 24, 18, 0.9); border: 2px solid var(--gilt);
+  border-radius: 12px; padding: 1.8rem 1.4rem; box-shadow: 0 8px 20px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+  justify-content: space-between; text-align: left; position: relative; transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.difficulty-card:hover:not(.locked-card) { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.8), 0 0 15px rgba(212,163,75,0.3); }
+.difficulty-card.hard { border-color: var(--wax-red-bright); background: linear-gradient(180deg, rgba(45, 15, 15, 0.9), rgba(24, 15, 15, 0.9)); }
+.difficulty-card.locked-card { opacity: 0.7; filter: grayscale(40%); }
+.difficulty-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+.diff-badge { font-family: var(--font-display); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 4px; }
+.diff-badge.normal { background: #064e3b; color: #6ee7b7; border: 1px solid #10b981; }
+.diff-badge.hard { background: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444; }
+.diff-badge.locked { background: #27272a; color: #a1a1aa; border: 1px solid #52525b; }
+.diff-title { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 0.5rem; color: #fff; }
+.diff-desc { font-size: 0.95rem; color: var(--parchment-muted); line-height: 1.45; margin: 0 0 1rem; }
+.diff-perks { list-style: none; padding: 0; margin: 0 0 1.5rem; font-size: 0.9rem; line-height: 1.5; color: var(--ink); }
+.diff-perks li { margin-bottom: 0.4rem; display: flex; align-items: flex-start; gap: 0.4rem; }
+.diff-perks li::before { content: '❖'; color: var(--gilt-bright); }
+.diff-rewards-box { background: rgba(0,0,0,0.4); border: 1px dashed var(--gilt); border-radius: 6px; padding: 0.6rem 0.8rem; font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; margin-bottom: 1.2rem; }
+.locked-reason-banner {
+  background: rgba(153,27,27,0.25); border: 1px solid var(--wax-red-bright); border-radius: 6px;
+  padding: 0.5rem 0.8rem; color: #fca5a5; font-family: var(--font-display); font-size: 0.85rem; font-weight: 700;
+  text-align: center; margin-bottom: 0.8rem;
+}
+
+/* ---------- Economy / Shop ---------- */
+.shop-screen { max-width: 820px; text-align: center; }
+.shop-items-container { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; width: 100%; margin: 1rem 0; }
+.shop-item {
+  background: var(--bg-surface); border: 2px solid var(--gilt); border-radius: 8px; padding: 1.5rem;
+  width: 100%; max-width: 250px; box-shadow: 0 6px 14px rgba(0,0,0,0.5); display: flex; flex-direction: column; justify-content: space-between;
+}
+.shop-item h3 { font-family: var(--font-display); margin: 0 0 0.5rem; font-size: 1.25rem; color: #fff; }
+.shop-item p { margin: 0 0 1.2rem; color: var(--parchment-muted); font-size: 0.92rem; line-height: 1.45; }
+
+/* ---------- Quests & Achievements Layout ---------- */
+.quests-container, .achievements-container {
+  width: 100%; max-width: 960px; background: var(--bg-surface); border: 2px solid var(--gilt);
+  outline: 1px solid rgba(212,163,75,0.25); outline-offset: -5px; border-radius: 10px; padding: 1.2rem 1.4rem;
+  margin: 0 auto 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+.quests-header, .achievements-header {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+  margin-bottom: 1rem; border-bottom: 1px dashed rgba(212,163,75,0.4); padding-bottom: 0.6rem;
+}
+.quests-title, .achievements-title {
+  font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin: 0; color: var(--gilt-bright);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.quests-date-badge, .achieve-stats-badge {
+  font-family: var(--font-display); font-size: 0.85rem; font-weight: 600; color: var(--parchment-muted); letter-spacing: 0.05em;
+}
+.quests-grid, .achievements-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;
+}
+.quest-card, .achieve-card {
+  background: var(--bg-surface-elevated); border: 1px solid rgba(212,163,75,0.4); border-radius: 8px; padding: 0.9rem;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 0.6rem; position: relative; text-align: left;
+}
+.quest-card.locked-quest-card { opacity: 0.5; filter: grayscale(50%); border-style: dashed; }
+.quest-card.hard-quest-card { border-color: rgba(225,29,72,0.5); background: rgba(45,15,15,0.85); }
+.quest-card.completed, .achieve-card.unlocked-ready { border-color: var(--gilt-bright); background: rgba(50,40,20,0.9); box-shadow: 0 0 10px rgba(251,191,36,0.3); }
+.quest-card.hard-quest-card.completed { border-color: var(--wax-red-bright); background: rgba(60,20,25,0.9); box-shadow: 0 0 10px rgba(239,68,68,0.3); }
+.achieve-card.claimed, .quest-card.claimed { opacity: 0.6; background: rgba(20,20,20,0.6); border-color: #52525b; }
+.achieve-card.locked { opacity: 0.85; border-color: rgba(212,163,75,0.25); }
+.quest-card-top, .achieve-card-top { display: flex; justify-content: space-between; align-items: center; }
+.quest-tier-badge, .achieve-cat-badge {
+  font-family: var(--font-display); font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.05em; padding: 0.18rem 0.5rem; border-radius: 4px;
+}
+.quest-tier--easy, .achieve-cat--battles { background: #064e3b; color: #6ee7b7; border: 1px solid #10b981; }
+.quest-tier--medium, .achieve-cat--attacks { background: #713f12; color: #fde047; border: 1px solid #ca8a04; }
+.quest-tier--hard, .achieve-cat--abilities { background: #3730a3; color: #c7d2fe; border: 1px solid #6366f1; }
+.achieve-cat--quests { background: #581c87; color: #f3e8ff; border: 1px solid #a855f7; }
+.achieve-cat--hardMode { background: #7f1d1d; color: #fecaca; border: 1px solid #ef4444; }
+
+.quest-desc, .achieve-desc { font-size: 0.95rem; font-weight: 600; color: #fff; margin: 0; line-height: 1.35; }
+.quest-rewards, .achieve-rewards { display: flex; gap: 0.5rem; font-family: var(--font-display); font-size: 0.82rem; font-weight: 700; }
+.quest-reward-gold, .achieve-reward-gold { color: var(--gilt-bright); }
+.quest-reward-gems, .achieve-reward-gems { color: #38bdf8; }
+.quest-progress-track, .achieve-progress-track {
+  width: 100%; height: 8px; background: #120e0b; border-radius: 4px; overflow: hidden; margin: 0.2rem 0; border: 1px solid rgba(255,255,255,0.1);
+}
+.quest-progress-fill, .achieve-progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--gilt-bright), #22c55e); transition: width 0.3s ease; box-shadow: 0 0 6px rgba(34,197,94,0.5);
+}
+.quest-progress-label, .achieve-progress-label {
+  display: flex; justify-content: space-between; font-size: 0.75rem; font-family: var(--font-display); color: var(--parchment-muted);
+}
+.quest-claim-btn, .achieve-claim-btn {
+  font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; padding: 0.35rem 0.85rem;
+  border-radius: 6px; background: linear-gradient(180deg, #22c55e, #15803d); color: #fff; border: 1px solid #4ade80;
+  cursor: pointer; box-shadow: 0 0 10px rgba(34,197,94,0.4); transition: transform 0.1s ease;
+}
+.quest-claim-btn:hover, .achieve-claim-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.quest-claimed-label, .achieve-claimed-label { font-family: var(--font-display); font-size: 0.75rem; font-weight: 700; color: #4ade80; }
+
+/* ---------- Summon Altar ---------- */
+.altar-screen { max-width: 800px; text-align: center; }
+.altar-banner-tabs, .achieve-filter-bar, .index-filter-bar {
+  display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin: 1rem 0;
+}
+.banner-tab-btn, .filter-btn {
+  font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; padding: 0.45em 1.1em;
+  border-radius: 20px; background: var(--bg-surface); border: 2px solid var(--gilt); color: var(--parchment-muted);
+  cursor: pointer; transition: all 0.15s ease;
+}
+.banner-tab-btn.active, .filter-btn.active {
+  background: var(--gilt); color: #000; border-color: var(--gilt-bright); box-shadow: 0 0 12px var(--gilt-glow);
+}
+.altar-pedestal {
+  background: linear-gradient(135deg, #241c14, #18120c);
+  border: 3px solid var(--gilt); outline: 1px solid rgba(212,163,75,0.35); outline-offset: -5px;
+  border-radius: 14px; padding: 1.8rem 1.2rem; margin: 1rem auto 1.5rem; width: 100%; max-width: 650px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.6);
+}
+.rotation-track { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin: 1.2rem 0 1.5rem; }
+.step-node {
+  background: #15110d; border: 2px solid rgba(212,163,75,0.4); border-radius: 8px; padding: 0.6rem 0.4rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+}
+.step-node.active { border-color: var(--gilt-bright); background: #352614; box-shadow: 0 0 15px rgba(251,191,36,0.5); transform: translateY(-3px); }
+.step-node.free-step { border-color: #38bdf8; }
+.step-node.free-step.active { border-color: #38bdf8; background: #0c2d48; box-shadow: 0 0 18px rgba(56,189,248,0.6); }
+.step-title { font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: var(--gilt-bright); }
+.step-cost { font-size: 0.95rem; font-weight: bold; }
+.step-cost.free { color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; }
+.pity-streak-bar {
+  background: rgba(0,0,0,0.5); border: 1px dashed var(--gilt); border-radius: 20px; padding: 0.4rem 1rem;
+  display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-display); font-size: 0.85rem;
+  font-weight: 700; color: var(--parchment-muted); margin-bottom: 1.2rem;
+}
+.pity-highlight { color: var(--gilt-bright); font-weight: 900; }
+.summon-btn-large { font-size: 1.2rem; padding: 0.8em 2.2em; }
+.altar-completed-banner {
+  background: #064e3b; border: 2px solid #22c55e; border-radius: 8px; padding: 0.8rem 1rem;
+  font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: #86efac; margin-bottom: 1rem;
+}
+
+/* ---------- Enhanced Badges ---------- */
+.move-row.enhanced, .passive-row.enhanced { background: rgba(251,191,36,0.15); border: 1px solid var(--gilt-bright); border-radius: 4px; padding: 0.15rem 0.35rem; margin: 0.15rem 0; }
+.move-row.enhanced .move-dmg { color: var(--gilt-bright); font-weight: bold; }
+.enhanced-badge-tag { font-family: var(--font-display); font-size: 0.65rem; font-weight: 800; color: var(--gilt-bright); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.3rem; }
+.aoe-badge-tag { font-family: var(--font-display); font-size: 0.65rem; font-weight: 800; color: #fdba74; background: rgba(194,65,12,0.5); border: 1px solid #f97316; border-radius: 4px; padding: 0.1rem 0.35rem; margin-left: 0.3rem; text-transform: uppercase; }
+.action-bar .move-btn.enhanced-move { border: 2px solid var(--gilt-bright) !important; box-shadow: 0 0 16px rgba(251,191,36,0.5) !important; }
+.action-bar .move-btn.enhanced-move::before { content: '★ ENHANCED'; position: absolute; top: 4px; right: 8px; font-family: var(--font-display); font-size: 0.62rem; font-weight: 800; color: #fef08a; text-shadow: 0 1px 2px #000; z-index: 4; }
+
+/* ---------- Elemental Guide ---------- */
+.type-guide { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; max-width: 760px; text-align: left; }
+.type-guide-row {
+  display: flex; align-items: center; gap: 0.7rem; background: var(--bg-surface); border: 1px solid rgba(212,163,75,0.4);
+  border-left: 5px solid var(--gilt); border-radius: 4px 8px 8px 4px; padding: 0.5rem 0.8rem; flex-wrap: wrap;
+}
+.type-guide-row.type-fire { border-left-color: var(--fire); }
+.type-guide-row.type-water { border-left-color: var(--water); }
+.type-guide-row.type-grass { border-left-color: var(--grass); }
+.type-guide-row.type-storm { border-left-color: var(--storm); }
+.type-guide-row.type-earth { border-left-color: var(--earth); }
+.type-guide-row.type-dark { border-left-color: var(--dark); }
+.type-guide-name { font-family: var(--font-display); font-weight: 700; min-width: 68px; color: #fff; }
+.type-guide-rel { font-size: 0.85rem; color: var(--parchment-muted); }
+.type-guide-rel strong { color: var(--gilt-bright); font-family: var(--font-display); font-size: 0.72rem; text-transform: uppercase; margin-right: 0.3rem; }
+.type-guide-rel.weak strong { color: var(--wax-red-bright); }
+.guide-btn {
+  font-family: var(--font-display); font-size: 0.78rem; background: rgba(0,0,0,0.4); border: 1px solid var(--gilt);
+  color: var(--parchment-muted); padding: 0.4em 1em; border-radius: 20px; cursor: pointer; transition: all 0.12s ease;
+}
+.guide-btn:hover { background: var(--gilt); color: #000; }
+
+/* ---------- Navigation & Buttons ---------- */
+.battle-top-nav { display: flex; gap: 1rem; justify-content: center; align-items: center; margin-bottom: 1rem; width: 100%; flex-wrap: wrap; }
+.battle-nav-btn {
+  font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; padding: 0.6em 1.5em; border-radius: 8px 14px 8px 14px;
+  cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: all 0.12s ease; display: inline-flex; align-items: center; justify-content: center;
+}
+.battle-nav-btn:hover { filter: brightness(1.15); transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.7); }
+.battle-nav-btn.guide-btn { background: linear-gradient(180deg, var(--bg-surface-elevated), var(--bg-surface)); border: 2px solid var(--gilt); color: var(--ink); }
+.battle-nav-btn.forfeit-btn { background: linear-gradient(180deg, #7f1d1d, #450a0a); border: 2px solid var(--wax-red-bright); color: #fecaca; }
+.battle-nav-btn.forfeit-btn:hover { background: var(--wax-red); color: #fff; }
+
+.primary-btn, .move-btn {
+  font-family: var(--font-display); font-weight: 700; letter-spacing: 0.03em;
+  background: linear-gradient(180deg, #eab308, #ca8a04); border: 2px solid #fef08a;
+  color: #1c150c; padding: 0.75em 1.6em; border-radius: 8px 14px 8px 14px; cursor: pointer;
+  box-shadow: 0 3px 0 #713f12, 0 6px 12px rgba(0,0,0,0.6); transition: all 0.12s ease;
+}
+.primary-btn:hover:not(:disabled), .move-btn:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 3px 0 #713f12, 0 0 15px rgba(251,191,36,0.6); }
+.primary-btn:active:not(:disabled), .move-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 #713f12, 0 2px 4px rgba(0,0,0,0.4); }
+.primary-btn:disabled, .move-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.move-btn { padding-right: 3.5rem; }
+
+/* ---------- Card Grids ---------- */
+.section-title { font-family: var(--font-display); font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 0 0 0.4rem; text-align: center; color: #fff; }
+.section-sub { text-align: center; color: var(--parchment-muted); margin: 0 0 1.5rem; }
+.count-badge { font-family: var(--font-display); font-weight: 700; color: var(--gilt-bright); }
+.creature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1rem; width: 100%; margin-bottom: 2rem; }
+
+.creature-card {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; text-align: left;
+  background: var(--bg-surface); border: 2px solid var(--gilt); outline: 1px solid rgba(212,163,75,0.25);
+  outline-offset: -5px; border-radius: 8px 5px 9px 4px; padding: 0.9rem; font-family: var(--font-body); color: var(--ink);
+  cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: all 0.12s ease; width: 100%;
+}
+.creature-card.type-fire { border-top: 6px solid var(--fire); }
+.creature-card.type-water { border-top: 6px solid var(--water); }
+.creature-card.type-grass { border-top: 6px solid var(--grass); }
+.creature-card.type-storm { border-top: 6px solid var(--storm); }
+.creature-card.type-earth { border-top: 6px solid var(--earth); }
+.creature-card.type-dark { border-top: 6px solid var(--dark); }
+.creature-card:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,0.7), 0 0 12px rgba(212,163,75,0.3); }
+.creature-card.selected { border-color: var(--gilt-bright); box-shadow: 0 0 0 3px rgba(251,191,36,0.5), 0 8px 18px rgba(0,0,0,0.7); }
+.creature-card:disabled { opacity: 0.4; cursor: not-allowed; }
+.creature-card .type-seal { position: absolute; top: 0.7rem; right: 0.7rem; }
+.selected-badge {
+  position: absolute; top: 0.6rem; left: 0.7rem; width: 22px; height: 22px; background: var(--gilt-bright);
+  color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #000;
+}
+.creature-name { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; display: block; margin-top: 0.1rem; color: #fff; }
+.creature-name::first-letter { color: var(--gilt-bright); font-size: 1.2em; }
+.creature-type-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--parchment-muted); display: block; }
+.creature-hp { font-family: var(--font-display); font-size: 0.85rem; display: block; margin-top: 0.15rem; color: #86efac; }
+.creature-moves { display: block; width: 100%; margin-top: 0.4rem; border-top: 1px dashed rgba(212,163,75,0.3); padding-top: 0.4rem; }
+.move-row { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.85rem; padding: 0.1rem 0; }
+.move-name { font-style: italic; color: #fff; }
+.move-dmg { font-family: var(--font-display); color: #fca5a5; white-space: nowrap; }
+.move-cost { font-size: 0.72rem; color: var(--gilt-bright); margin-left: 0.3rem; }
+.creature-passive { display: block; font-size: 0.8rem; font-style: italic; color: var(--parchment-muted); margin-top: 0.4rem; line-height: 1.35; }
+
+/* ---------- Card Index / Bestiary Screen ---------- */
+.index-screen, .achieve-screen, .quests-screen { max-width: 1200px; }
+.index-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.4rem; width: 100%; margin-bottom: 2.5rem; }
+.index-card {
+  background: var(--bg-surface); border: 2px solid var(--gilt); outline: 1px solid rgba(212,163,75,0.25);
+  outline-offset: -5px; border-radius: 10px; padding: 1.2rem; box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column; gap: 0.8rem; text-align: left;
+}
+.index-card.type-fire { border-top: 6px solid var(--fire); }
+.index-card.type-water { border-top: 6px solid var(--water); }
+.index-card.type-grass { border-top: 6px solid var(--grass); }
+.index-card.type-storm { border-top: 6px solid var(--storm); }
+.index-card.type-earth { border-top: 6px solid var(--earth); }
+.index-card.type-dark { border-top: 6px solid var(--dark); }
+.index-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.index-move-section {
+  display: flex; flex-direction: column; gap: 0.5rem; background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(212,163,75,0.35); border-radius: 6px; padding: 0.6rem 0.8rem;
+}
+.index-move-title { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--gilt-bright); display: flex; justify-content: space-between; }
+.index-enh-preview { margin-top: 0.35rem; padding: 0.45rem 0.6rem; border-radius: 6px; font-size: 0.85rem; line-height: 1.35; }
+.index-enh-preview.unlocked { background: rgba(202,138,4,0.2); border: 1px solid var(--gilt-bright); color: #fef08a; }
+.index-enh-preview.locked { background: rgba(0, 0, 0, 0.25); border: 1px dashed #52525b; color: #a1a1aa; }
+.status-pill { font-family: var(--font-display); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.15rem 0.45rem; border-radius: 4px; }
+.status-pill.unlocked { background: #ca8a04; color: #000; }
+.status-pill.locked { background: #3f3f46; color: #d4d4d8; }
+
+/* ---------- Battle Screen ---------- */
+.battle-screen { max-width: 900px; gap: 1rem; }
+.party-rosters-container { width: 100%; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.party-roster-group {
+  display: flex; flex-direction: column; align-items: center; gap: 0.45rem; background: rgba(24,20,16,0.85);
+  border: 1px solid var(--gilt); border-radius: 8px 14px 8px 14px; padding: 0.55rem 0.9rem 0.65rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.roster-badge { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.18rem 0.75rem; border-radius: 12px; }
+.player-badge { background: linear-gradient(180deg, #1c150c, #0d0a06); color: var(--gilt-bright); border: 1px solid var(--gilt); }
+.enemy-badge { background: linear-gradient(180deg, #7f1d1d, #450a0a); color: #fee2e2; border: 1px solid #ef4444; }
+.boss-badge { background: linear-gradient(180deg, #581c87, #2e1065); color: #f3e8ff; border: 1px solid #c084fc; box-shadow: 0 0 10px rgba(192,132,252,0.6); }
+.difficulty-indicator-badge { background: linear-gradient(180deg, #7f1d1d, #991b1b); color: #fee2e2; border: 1px solid #ef4444; }
+.party-row { display: flex; gap: 0.45rem; justify-content: center; align-items: center; }
+.party-token { position: relative; transition: all 0.15s ease; cursor: default; }
+.party-token.active { box-shadow: 0 0 0 3px var(--gilt-bright), 0 0 15px rgba(251,191,36,0.8) !important; transform: scale(1.12); z-index: 2; }
+.party-token.fainted { filter: grayscale(85%) brightness(0.4); opacity: 0.4; }
+.fainted-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 900; color: #ef4444; text-shadow: 0 0 4px #000; z-index: 3; }
+
+.versus-area { width: 100%; display: flex; align-items: stretch; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.mon-panel {
+  flex: 1 1 260px; max-width: 320px; position: relative; background-color: var(--bg-surface); border: 2px solid var(--gilt);
+  outline: 1px solid rgba(212,163,75,0.25); outline-offset: -5px; border-radius: 10px 6px 10px 6px; padding: 1rem; text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+.mon-panel.type-fire { border-top: 6px solid var(--fire); }
+.mon-panel.type-water { border-top: 6px solid var(--water); }
+.mon-panel.type-grass { border-top: 6px solid var(--grass); }
+.mon-panel.type-storm { border-top: 6px solid var(--storm); }
+.mon-panel.type-earth { border-top: 6px solid var(--earth); }
+.mon-panel.type-dark { border-top: 6px solid var(--dark); }
+.mon-panel.boss-panel { border-color: #c084fc; box-shadow: 0 0 25px rgba(192,132,252,0.4); }
+.mon-panel.empty { display: flex; align-items: center; justify-content: center; opacity: 0.7; font-style: italic; min-height: 160px; font-family: var(--font-display); font-size: 1.1rem; color: var(--parchment-muted); }
+.mon-panel .type-seal { margin-bottom: 0.4rem; }
+.mon-name { font-family: var(--font-display); font-size: 1.3rem; margin: 0.2rem 0 0.6rem; color: #fff; }
+.mon-name::first-letter { color: var(--gilt-bright); font-size: 1.15em; }
+.hp-row { display: flex; align-items: center; gap: 0.5rem; }
+.hp-bar-track { flex: 1; height: 14px; background: #120e0b; border: 1px solid rgba(212,163,75,0.4); border-radius: 7px; overflow: hidden; }
+.hp-bar-fill { height: 100%; background: linear-gradient(180deg, #ef4444, #991b1b); transition: width 0.4s ease; box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+.hp-text { font-family: var(--font-display); font-size: 0.8rem; white-space: nowrap; color: #fff; }
+.energy-pips { display: flex; gap: 0.3rem; justify-content: center; margin-top: 0.6rem; }
+.pip { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--gilt); background: transparent; }
+.pip.filled { background: var(--gilt-bright); box-shadow: 0 0 8px rgba(251,191,36,0.8); }
+.vs-divider { font-family: var(--font-display); font-weight: 900; font-size: 1.4rem; color: var(--gilt-bright); align-self: center; text-shadow: 0 0 10px rgba(251,191,36,0.5); }
+
+/* Inline Selector Area for Battlefield */
+.inline-pick-container {
+  width: 100%; background: var(--bg-surface); border: 2px solid var(--gilt); outline: 1px solid rgba(212,163,75,0.25);
+  outline-offset: -5px; border-radius: 10px; padding: 1rem 1.2rem; margin: 0.4rem 0 1rem; box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  text-align: center;
+}
+.inline-pick-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; margin: 0 0 0.8rem; color: var(--gilt-bright); }
+.inline-pick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.8rem; width: 100%; }
+
+.battle-lower { width: 100%; display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.action-bar { flex: 1 1 260px; display: flex; flex-direction: column; gap: 0.6rem; }
+.move-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; text-align: left; width: 100%; }
+.move-btn-name { font-size: 1rem; }
+.move-btn-dmg { font-size: 0.78rem; font-family: var(--font-body); font-style: italic; }
+.move-btn-cost { font-size: 0.72rem; font-family: var(--font-body); font-style: italic; }
+
+.action-bar[class*="type-"] .move-btn.open-items-btn {
+  background: linear-gradient(180deg, #0e7490, #083344);
+  border-color: #38bdf8;
+  color: #fff;
+  box-shadow: 0 3px 0 #083344, 0 5px 8px rgba(0,0,0,0.5);
+}
+.action-bar[class*="type-"] .move-btn.open-items-btn .move-btn-dmg { color: #a5f3fc; }
+
+.action-bar[class*="type-"] .move-btn { position: relative; color: #fff; overflow: hidden; z-index: 1; }
+.action-bar[class*="type-"] .move-btn span { position: relative; z-index: 2; }
+.action-bar[class*="type-"] .move-btn .move-btn-dmg { color: rgba(255, 255, 255, 0.85); }
+.action-bar[class*="type-"] .move-btn .move-btn-cost { color: rgba(255, 255, 255, 0.95); }
+.action-bar[class*="type-"] .move-btn.special .move-btn-cost { color: #ffe699; font-weight: bold; }
+.action-bar.type-fire .move-btn { background: linear-gradient(180deg, #e11d48, #881337); border-color: #fda4af; box-shadow: 0 3px 0 #4c0519, 0 5px 8px rgba(0,0,0,0.5); }
+.action-bar.type-fire .move-btn.special { background: linear-gradient(180deg, #f43f5e, #be123c); box-shadow: 0 3px 0 #4c0519, 0 0 16px rgba(244,63,94,0.6); }
+.action-bar.type-water .move-btn { background: linear-gradient(180deg, #0284c7, #0369a1); border-color: #7dd3fc; box-shadow: 0 3px 0 #0c4a6e, 0 5px 8px rgba(0,0,0,0.5); }
+.action-bar.type-water .move-btn.special { background: linear-gradient(180deg, #0ea5e9, #0284c7); box-shadow: 0 3px 0 #0c4a6e, 0 0 16px rgba(14,165,233,0.6); }
+.action-bar.type-grass .move-btn { background: linear-gradient(180deg, #16a34a, #15803d); border-color: #86efac; box-shadow: 0 3px 0 #14532d, 0 5px 8px rgba(0,0,0,0.5); }
+.action-bar.type-grass .move-btn.special { background: linear-gradient(180deg, #22c55e, #16a34a); box-shadow: 0 3px 0 #14532d, 0 0 16px rgba(34,197,94,0.6); }
+.action-bar.type-storm .move-btn { background: linear-gradient(180deg, #9333ea, #7e22ce); border-color: #d8b4fe; box-shadow: 0 3px 0 #581c87, 0 5px 8px rgba(0,0,0,0.5); }
+.action-bar.type-storm .move-btn.special { background: linear-gradient(180deg, #a855f7, #9333ea); box-shadow: 0 3px 0 #581c87, 0 0 16px rgba(168,85,247,0.6); }
+.action-bar.type-earth .move-btn { background: linear-gradient(180deg, #ca8a04, #a16207); border-color: #fde047; box-shadow: 0 3px 0 #713f12, 0 5px 8px rgba(0,0,0,0.5); }
+.action-bar.type-earth .move-btn.special { background: linear-gradient(180deg, #eab308, #ca8a04); box-shadow: 0 3px 0 #713f12, 0 0 16px rgba(234,179,8,0.6); }
+.action-bar.type-dark .move-btn { background: linear-gradient(180deg, #4f46e5, #312e81); border-color: #a5b4fc; box-shadow: 0 3px 0 #1e1b4b, 0 5px 8px rgba(0,0,0,0.5); }
+.action-bar.type-dark .move-btn.special { background: linear-gradient(180deg, #6366f1, #4338ca); box-shadow: 0 3px 0 #1e1b4b, 0 0 16px rgba(99,102,241,0.6); }
+
+/* Effectiveness Indicators */
+.eff-arrow { position: absolute; right: 1.25rem; top: 0; bottom: 0; display: flex; align-items: center; font-size: 1.8rem; z-index: 5; }
+.eff-up { color: #4ade80; text-shadow: 0 0 8px rgba(74,222,128,0.8); }
+.eff-up::before { content: '▲'; animation: floatUp 0.8s ease-in-out infinite alternate; display: block; }
+.eff-down { color: #f87171; text-shadow: 0 0 8px rgba(248,113,113,0.8); }
+.eff-down::before { content: '▼'; animation: floatDown 0.8s ease-in-out infinite alternate; display: block; }
+@keyframes floatUp { from { transform: translateY(4px); } to { transform: translateY(-4px); } }
+@keyframes floatDown { from { transform: translateY(-4px); } to { transform: translateY(4px); } }
+
+/* ---------- Chronicle Box ---------- */
+.battle-log-panel {
+  flex: 1 1 300px; max-height: 230px; overflow-y: auto;
+  background: linear-gradient(135deg, rgba(28,22,17,0.95) 0%, rgba(18,14,11,0.98) 100%);
+  border: 2px solid var(--gilt); outline: 1px solid rgba(212,163,75,0.25); outline-offset: -4px;
+  border-radius: 8px 14px 8px 14px; padding: 0.85rem 1.1rem; box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 6px 14px rgba(0,0,0,0.6);
+  font-family: var(--font-body); font-size: 1.05rem; line-height: 1.55; color: var(--ink);
+}
+.battle-log-panel::-webkit-scrollbar { width: 6px; }
+.battle-log-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 3px; }
+.battle-log-panel::-webkit-scrollbar-thumb { background: var(--gilt); border-radius: 3px; }
+.log-entry { margin: 0 0 0.42rem; animation: fadeIn 0.3s ease; font-weight: 600; }
+.log-entry::before { content: '❧ '; color: var(--gilt-bright); font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; margin-right: 0.35em; }
+
+/* ---------- Modals ---------- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; padding: 1.5rem; z-index: 200; backdrop-filter: blur(3px); }
+.modal-box { background: var(--bg-surface); border: 3px solid var(--gilt); border-radius: 10px; padding: 1.5rem; max-width: 800px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.9); }
+.modal-box h2 { font-family: var(--font-display); text-align: center; margin-top: 0; color: var(--gilt-bright); }
+
+.forfeit-modal-box, .reset-modal-box, .name-modal-box, .levelup-modal-box, .items-modal-box, .boss-unlock-modal-box { max-width: 520px; text-align: center; padding: 2rem 1.5rem; }
+.forfeit-msg, .reset-msg, .name-modal-msg { font-size: 1.15rem; color: var(--parchment-muted); margin: 1rem 0 1.5rem; line-height: 1.5; }
+.name-input-field {
+  width: 100%; max-width: 320px; padding: 0.65rem 0.9rem; font-family: var(--font-display); font-size: 1.1rem;
+  background: #140f0c; border: 2px solid var(--gilt); border-radius: 8px; color: #fff;
+  text-align: center; margin-bottom: 1.5rem; outline: none; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+}
+.name-input-field:focus { border-color: var(--gilt-bright); box-shadow: 0 0 12px rgba(251,191,36,0.5); }
+.modal-buttons { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; }
+.forfeit-confirm-btn, .reset-confirm-btn { background: linear-gradient(180deg, #ef4444, #991b1b); color: #fff; border-color: #fca5a5; box-shadow: 0 3px 0 #7f1d1d, 0 5px 8px rgba(0,0,0,0.5); }
+
+/* ---------- Items Modal ---------- */
+.items-list-grid { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.2rem 0 1.5rem; text-align: left; }
+.item-modal-row {
+  background: var(--bg-surface-elevated); border: 1.5px solid var(--gilt); border-radius: 8px; padding: 0.8rem 1rem;
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem; box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+.item-modal-info { flex: 1; }
+.item-modal-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.4rem; }
+.item-modal-desc { font-size: 0.88rem; color: var(--parchment-muted); line-height: 1.35; }
+.item-modal-owned { font-size: 0.82rem; font-family: var(--font-display); font-weight: 700; color: var(--gilt-bright); margin-top: 0.2rem; }
+.item-modal-use-btn {
+  font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; padding: 0.5em 1.2em; border-radius: 6px;
+  background: linear-gradient(180deg, #eab308, #ca8a04); border: 1.5px solid #fef08a; color: #1c150c;
+  cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.4); transition: transform 0.1s ease; white-space: nowrap;
+}
+.item-modal-use-btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
+.item-modal-use-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+/* ---------- Level Up Modal ---------- */
+.levelup-modal-box {
+  background: radial-gradient(circle at 50% 30%, #2e1065 0%, var(--bg-surface) 100%);
+  border: 3px solid #c084fc; box-shadow: 0 0 35px rgba(168,85,247,0.6);
+}
+.levelup-badge-big {
+  font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; color: #d8b4fe;
+  text-shadow: 0 0 15px rgba(192,132,252,0.8); margin: 0.5rem 0;
+}
+.levelup-unlock-note {
+  background: rgba(147,51,234,0.2); border: 2px dashed #c084fc; border-radius: 8px;
+  padding: 0.8rem 1rem; margin: 0.6rem 0; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: #f3e8ff; text-align: left;
+}
+
+/* ---------- Boss Unlock Modal ---------- */
+.boss-unlock-modal-box {
+  background: radial-gradient(circle at 50% 30%, #2e1065 0%, #0f0c1b 100%);
+  border: 3px solid #a78bfa; box-shadow: 0 0 40px rgba(167, 139, 250, 0.7);
+}
+
+/* ---------- Summon Reveal Modal ---------- */
+.summon-reveal-box {
+  max-width: 520px; text-align: center; padding: 2rem 1.5rem;
+  background: radial-gradient(circle at 50% 30%, #352614 0%, var(--bg-surface) 100%);
+  border: 3px solid var(--gilt-bright); box-shadow: 0 0 35px rgba(251,191,36,0.6);
+}
+.summon-reveal-box.is-pity { border-color: #38bdf8; box-shadow: 0 0 35px rgba(56,189,248,0.6); background: radial-gradient(circle at 50% 30%, #0c2d48 0%, var(--bg-surface) 100%); }
+.summon-reveal-box.is-duplicate { border-color: #52525b; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+.summon-title { color: var(--gilt-bright); font-family: var(--font-display); font-size: 1.8rem; margin: 0 0 0.5rem; }
+.summon-title.is-pity { color: #38bdf8; }
+.summon-title.is-duplicate { color: #a1a1aa; }
+.summon-card-preview { background: var(--bg-surface-elevated); border: 2px solid var(--gilt-bright); box-shadow: 0 0 16px rgba(251,191,36,0.4); border-radius: 10px; padding: 1.2rem; margin: 1.2rem auto; max-width: 320px; }
+.summon-card-preview.is-duplicate { border-color: #52525b; box-shadow: none; opacity: 0.85; }
+.summon-effect-desc { font-style: italic; color: var(--parchment-muted); margin: 0.6rem 0 0; font-size: 0.95rem; }
+.dupe-status-banner { background: rgba(0,0,0,0.5); border: 1px solid #52525b; border-radius: 6px; padding: 0.4rem 0.8rem; font-family: var(--font-display); font-size: 0.82rem; font-weight: 700; color: #a1a1aa; margin: 0.8rem 0 0.2rem; }
+
+/* ---------- End Screen & Confetti ---------- */
+.end-screen { justify-content: center; align-items: center; text-align: center; position: relative; z-index: 10; }
+.end-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(2.4rem, 8vw, 4rem); margin: 0 0 0.5rem; }
+.end-screen.victory .end-title { color: var(--gilt-bright); text-shadow: 0 0 20px rgba(251,191,36,0.6), 0 2px 0 #000; }
+.end-screen.defeat .end-title { color: #f87171; text-shadow: 0 0 20px rgba(239,68,68,0.6); }
+.end-sub { color: var(--parchment-muted); font-size: 1.2rem; margin: 0 0 1.5rem; max-width: 600px; font-weight: 600; line-height: 1.45; }
+.rewards-wrapper { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
+.gold-reward { font-family: var(--font-display); font-size: 1.3rem; color: var(--gilt-bright); text-shadow: 0 0 8px rgba(251,191,36,0.6); font-weight: bold; }
+.gem-reward { font-family: var(--font-display); font-size: 1.3rem; color: #38bdf8; text-shadow: 0 0 8px rgba(56,189,248,0.6); font-weight: bold; }
+.xp-reward { font-family: var(--font-display); font-size: 1.3rem; color: #c084fc; text-shadow: 0 0 8px rgba(192,132,252,0.6); font-weight: bold; }
+
+.confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 9999; }
+.confetti { position: absolute; top: -10vh; animation-name: confettiFall; animation-timing-function: linear; animation-fill-mode: forwards; border-radius: 2px; }
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  75% { opacity: 1; }
+  100% { transform: translateY(120vh) rotate(720deg); opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  .versus-area { flex-direction: column; align-items: center; }
+  .vs-divider { transform: rotate(90deg); margin: -0.3rem 0; }
+  .mon-panel { max-width: 100%; width: 100%; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  'use strict';
+
+  var TYPE_META = {
+    fire:  { label: 'Fire' },
+    water: { label: 'Water' },
+    grass: { label: 'Nature' },
+    storm: { label: 'Storm' },
+    earth: { label: 'Earth' },
+    dark:  { label: 'Dark' }
+  };
+
+  var TYPE_ICONS = {
+    fire: '<path d="M12,2 C10.5,5.5 14,8.5 12.5,12 C11.5,10.5 11,9.5 9,8.5 C7,11.5 6,13.5 6,16 C6,19.3 8.7,22 12,22 C15.3,22 18,19.3 18,16 C18,12 15.5,7 12,2 Z"/>',
+    water: '<path d="M12,2 C12,2 5,11.5 5,16 C5,19.866 8.134,23 12,23 C15.866,23 19,19.866 19,16 C19,11.5 12,2 12,2 Z"/>',
+    grass: '<path d="M4.8,19.5 C4.2,14.5 5.8,7.8 11.8,4.5 C15.5,4.3 18.5,5.2 20.2,6.2 C17.5,11.5 15,15.2 10.5,17.2 C8.2,17.5 6.5,17.5 6.5,17.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.8,13.8 C8.5,12 10.8,10.8 12.5,10.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>',
+    storm: '<polygon points="13,2 6,14 11,14 9,22 18,10 13,10"/>',
+    earth: '<polygon points="9,6 13,12 17,4 22,20 2,20"/>',
+    dark:  '<path d="M12,2 C6.48,2 2,6.48 2,12 C2,17.52 6.48,22 12,22 C17.52,22 22,17.52 22,12 C22,6.48 17.52,2 12,2 Z M12,20 C7.58,20 4,16.42 4,12 C4,7.58 7.58,4 12,4 C13.08,4 14.1,4.22 15.03,4.62 C12.6,6.1 11,8.85 11,12 C11,15.15 12.6,17.9 15.03,19.38 C14.1,19.78 13.08,20 12,20 Z"/>'
+  };
+
+  var EFFECTIVENESS = {
+    fire:  { fire: 1, water: 0.67, grass: 1.5, storm: 1, earth: 1.0, dark: 1 },
+    water: { fire: 1.5, water: 1, grass: 0.67, storm: 0.67, earth: 1, dark: 1 },
+    grass: { fire: 0.67, water: 1.5, grass: 1, storm: 1, earth: 1.5, dark: 1 },
+    storm: { fire: 1, water: 1.5, grass: 1, storm: 1, earth: 0.67, dark: 1 },
+    earth: { fire: 1.5, water: 1, grass: 0.67, storm: 1.5, earth: 1, dark: 1 },
+    dark:  { fire: 1, water: 1, grass: 1, storm: 1, earth: 1, dark: 1 }
+  };
+
+  var VICTORY_MSGS = [
+    "Congrats you beat a bot, how skilled of you",
+    "Wow, how impressive now try and beat a real player. Oh wait, the developer hasn't developed that option yet",
+    "That was a close one eh?",
+    "Nah that was a fluke, you're not gonna win next time"
+  ];
+
+  var DEFEAT_MSGS = [
+    "Bro really lost to a bot lmao",
+    "How trash can one be?",
+    "Better luck next time buddy",
+    "You might have a skill issue ngl",
+    "Womp Womp"
+  ];
+
+  var GODZILLA_MODEL_SVG = '<path d="M25,85 C20,80 15,80 5,88 C-2,93 0,98 8,96 C18,93 25,90 32,85 Z"/><path d="M40,55 C35,65 30,85 30,95 L48,95 C48,85 52,75 52,65 Z"/><path d="M60,60 C65,70 70,85 70,95 L88,95 C86,82 78,70 72,60 Z"/><path d="M38,50 C32,38 35,25 45,15 C52,7 68,5 78,12 C82,15 88,18 92,18 C92,23 88,27 82,28 C85,32 80,36 72,36 C68,48 65,58 60,65 C50,70 42,65 38,50 Z"/><polygon points="40,25 32,20 38,32" class="model-accent"/><polygon points="34,38 24,35 32,46" class="model-accent"/><polygon points="30,52 18,50 28,60" class="model-accent"/><polygon points="26,66 14,68 25,74" class="model-accent"/><polygon points="68,22 75,24 72,28" class="model-accent"/><circle cx="66" cy="16" r="2.5" class="model-dark"/><circle cx="66" cy="16" r="1.2" class="model-accent"/>';
+
+  /* TASK 43: Godzilla Boss move damage tuned down (Radiation -50%, Atomic Slam -35%) */
+  var BOSSES = [
+    {
+      id: 'godzilla_boss',
+      name: 'Godzilla',
+      type: 'dark',
+      maxHp: 500,
+      basic: { name: 'Atomic Slam', dmg: 23 },
+      special: { name: 'Radiation', dmg: 23, cost: 2, aoe: true },
+      passive: 'radiationAura',
+      passiveDesc: 'Ancient Radiation: Incoming damage is reduced by 5, and radiates 5 damage to active foe every turn.',
+      model: GODZILLA_MODEL_SVG
+    }
+  ];
+
+  /* TASK 45: Playable Godzilla maxHp set to 100, passive updated with flat -4 damage reduction */
+  var PLAYABLE_GODZILLA = {
+    id: 'godzilla',
+    name: 'Godzilla',
+    type: 'dark',
+    maxHp: 100,
+    basic: { name: 'Atomic Claw', dmg: 14 },
+    special: { name: 'Atomic Breath', dmg: 26, cost: 2, aoe: true },
+    passive: 'radiation',
+    passiveDesc: 'Heavy Carapace reduces incoming damage by 4, and radiates 4 damage to the foe each turn.',
+    model: GODZILLA_MODEL_SVG
+  };
+
+  var CREATURES = [
+    { id: 'phoenix', name: 'Phoenix', type: 'fire', maxHp: 60,
+      basic: { name: 'Ember Peck', dmg: 12 }, special: { name: 'Solar Flare', dmg: 26, cost: 2 },
+      passive: 'rebirth', passiveDesc: 'Once per battle, rises from defeat with 20 HP instead of fainting.',
+      model: '<path d="M45,75 L30,95 L50,85 L70,95 L55,75 Z" /><path d="M50,30 C30,30 10,20 10,20 C15,35 25,50 40,55 L35,85 L50,75 L65,85 L60,55 C75,50 85,35 90,20 C90,20 70,30 50,30 Z" /><path d="M50,15 C55,15 60,20 60,25 C60,35 40,35 40,25 C40,20 45,15 50,15 Z" /><path d="M45,15 L40,5 L50,10 L60,5 L55,15 Z" class="model-accent"/><circle cx="48" cy="22" r="2" class="model-dark"/>' },
+    { id: 'ifrit', name: 'Ifrit', type: 'fire', maxHp: 65,
+      basic: { name: 'Cinder Claw', dmg: 13 }, special: { name: 'Infernal Burst', dmg: 24, cost: 2, aoe: true },
+      passive: 'scorch', passiveDesc: 'Infernal Burst may scorch the foe, searing them at the start of their next turn.',
+      model: '<path d="M40,30 C30,40 30,60 40,70 C50,80 30,90 20,95 C40,95 70,80 60,65 C55,55 70,40 60,30 Z" /><path d="M40,15 C40,5 60,5 60,15 C60,25 55,30 50,30 C45,30 40,25 40,15 Z" /><path d="M35,35 C20,35 15,50 25,55 C35,60 45,50 50,45 C55,50 65,60 75,55 C85,50 80,35 65,35 Z" /><path d="M42,16 C34,14 26,8 22,2 C28,6 39,8 46,11 Z" class="model-accent"/><path d="M58,16 C66,14 74,8 78,2 C72,6 61,8 54,11 Z" class="model-accent"/>' },
+    { id: 'salamander', name: 'Salamander', type: 'fire', maxHp: 55,
+      basic: { name: 'Tail Whip', dmg: 14 }, special: { name: 'Molten Bite', dmg: 22, cost: 2 },
+      passive: 'dyingEmber', passiveDesc: 'When it falls, its dying ember burns the foe for 14.',
+      model: '<path d="M20,80 C10,80 5,60 20,55 C40,50 60,60 75,50 C85,45 90,30 80,25 C70,20 60,30 65,40 C70,50 50,40 30,45 C15,50 15,70 25,75 Z" /><path d="M25,55 L15,45 L20,40 L30,52 Z" /><path d="M40,50 L35,35 L42,33 L45,47 Z" /><path d="M55,45 L50,35 L57,33 L60,45 Z" /><path d="M70,50 L80,65 L87,60 L75,48 Z" /><path d="M30,45 L35,30 L40,43 L48,25 L53,40 L62,28 L65,40 Z" class="model-accent"/><circle cx="78" cy="30" r="2" class="model-dark"/>' },
+
+    { id: 'kraken', name: 'Kraken', type: 'water', maxHp: 80,
+      basic: { name: 'Tentacle Lash', dmg: 12 }, special: { name: 'Crushing Grip', dmg: 22, cost: 2 },
+      passive: 'crushingGrip', passiveDesc: 'Crushing Grip deals 12 bonus damage to a foe below 30% HP.',
+      model: '<path d="M35,50 C20,60 10,80 15,95 C20,85 30,70 40,55 Z" /><path d="M45,50 C40,70 35,90 45,95 C50,85 50,70 50,55 Z" /><path d="M55,50 C60,70 65,90 55,95 C50,85 50,70 50,55 Z" /><path d="M65,50 C80,60 90,80 85,95 C80,85 70,70 60,55 Z" /><path d="M30,40 C30,10 70,10 70,40 C70,55 30,55 30,40 Z" /><circle cx="40" cy="35" r="4" class="model-accent"/><circle cx="60" cy="35" r="4" class="model-accent"/><circle cx="40" cy="35" r="1.5" class="model-dark"/><circle cx="60" cy="35" r="1.5" class="model-dark"/>' },
+    { id: 'nixie', name: 'Nixie', type: 'water', maxHp: 58,
+      basic: { name: 'Siren Song', dmg: 12 }, special: { name: 'Tidal Wave', dmg: 24, cost: 2, aoe: true },
+      passive: 'lure', passiveDesc: 'Siren Song may lure the foe, halving the damage of their next attack.',
+      model: '<path d="M45,50 C30,60 20,80 40,95 C60,80 70,60 55,50 Z" /><path d="M40,95 C30,90 20,95 20,95 C30,105 40,100 40,95 Z" class="model-accent"/><path d="M60,95 C50,90 40,95 40,95 C50,105 60,100 60,95 Z" class="model-accent"/><path d="M42,25 C42,40 40,55 45,55 C50,55 58,40 58,25 Z" /><path d="M42,20 C42,10 58,10 58,20 C58,30 42,30 42,20 Z" /><path d="M45,10 C20,10 10,30 25,45 C20,30 30,20 42,15 Z" class="model-accent"/><path d="M55,10 C80,10 90,30 75,45 C80,30 70,20 58,15 Z" class="model-accent"/>' },
+    { id: 'leviathan', name: 'Leviathan', type: 'water', maxHp: 85,
+      basic: { name: 'Deep Current', dmg: 13 }, special: { name: 'Abyssal Roar', dmg: 24, cost: 2 },
+      passive: 'thickHide', passiveDesc: 'Thick hide reduces all incoming damage by 4.',
+      model: '<path d="M15,86 C15,74 35,70 58,72 C80,74 88,82 85,90 C80,97 50,98 28,95 C16,93 15,86 15,86 Z"/><path d="M60,78 C70,55 64,30 48,16 C36,6 20,12 14,24 C10,32 12,42 22,46 C16,49 10,44 8,36 C6,24 16,10 32,5 C52,-2 76,14 78,42 C80,62 70,78 60,78 Z"/><polygon points="48,15 54,6 58,16" class="model-accent"/><polygon points="62,24 72,18 68,30" class="model-accent"/><polygon points="73,38 84,36 76,46" class="model-accent"/><polygon points="76,54 86,55 74,62" class="model-accent"/><path d="M25,28 C20,20 12,22 8,28 C5,32 8,36 15,35 C20,34 26,35 25,28 Z"/><path d="M18,39 C14,42 9,41 7,37 C10,36 14,35 18,39 Z"/><polygon points="12,32 10,38 14,35" class="model-accent"/><circle cx="16" cy="28" r="2.5" class="model-accent"/><circle cx="16" cy="28" r="1.2" class="model-dark"/>' },
+
+    { id: 'dryad', name: 'Dryad', type: 'grass', maxHp: 62,
+      basic: { name: 'Vine Whip', dmg: 12 }, special: { name: "Nature's Wrath", dmg: 23, cost: 2 },
+      passive: 'regrowth', passiveDesc: 'Regrows 6 HP at the start of each of her turns.',
+      model: '<path d="M46,25 C41,32 42,38 44,44 C38,58 32,75 26,95 L74,95 C68,75 62,58 56,44 C58,38 59,32 54,25 Z" /><path d="M22,95 C30,82 34,70 36,58 L40,68 C36,78 30,95 22,95 Z" /><path d="M78,95 C70,82 66,70 64,58 L60,68 C64,78 70,95 78,95 Z" /><path d="M43,32 C33,30 20,20 12,8 C18,17 28,26 43,36 Z" /><path d="M57,32 C67,30 80,20 88,8 C82,17 72,26 57,36 Z" /><path d="M50,46 C48,62 46,78 43,95 L57,95 C54,78 52,62 50,46 Z" class="model-accent"/><ellipse cx="50" cy="18.5" rx="7.5" ry="9.5" /><path d="M49,9 C41,9 35,15 33,23 C31,33 33,45 37,54 C34,45 37,30 43,20 C45,16 47,11 49,9 Z" class="model-accent"/><path d="M51,9 C59,9 65,15 67,23 C69,33 67,45 63,54 C66,45 63,30 57,20 C55,16 53,11 51,9 Z" class="model-accent"/><path d="M44,14 C48,11 52,11 56,14 C53,13 47,13 44,14 Z" class="model-accent"/>' },
+    { id: 'satyr', name: 'Satyr', type: 'grass', maxHp: 54,
+      basic: { name: 'Reed Pipe', dmg: 11 }, special: { name: 'Wild Charge', dmg: 24, cost: 2 },
+      passive: 'trickster', passiveDesc: 'Reed Pipe may befuddle the foe, halving their next attack.',
+      model: '<path d="M45,55 C35,70 45,85 40,95 L48,95 L50,85 C52,90 55,95 55,95 L63,95 C58,85 65,70 55,55 Z" /><path d="M42,55 L42,30 C42,20 58,20 58,30 L58,55 Z" /><path d="M45,20 C45,10 55,10 55,20 C55,30 45,30 45,20 Z" /><path d="M45,15 C35,10 35,5 40,5 C42,10 48,12 45,15 Z" class="model-accent"/><path d="M55,15 C65,10 65,5 60,5 C58,10 52,12 55,15 Z" class="model-accent"/><path d="M42,35 C35,40 35,45 42,45 L48,42 Z" /><path d="M58,35 C65,40 65,45 58,45 L52,42 Z" /><path d="M40,43 L60,38 L62,41 L42,46 Z" class="model-accent"/>' },
+    { id: 'ent', name: 'Ent', type: 'grass', maxHp: 90,
+      basic: { name: 'Root Grasp', dmg: 12 }, special: { name: 'Timberfall', dmg: 22, cost: 2 },
+      passive: 'ironbark', passiveDesc: 'Ironbark reduces all incoming damage by 5.',
+      model: '<path d="M30,95 C35,70 30,40 50,30 C70,40 65,70 70,95 C65,85 60,80 55,95 C50,85 45,85 45,95 C40,80 35,85 30,95 Z" /><path d="M20,45 C10,20 30,10 50,5 C70,10 90,20 80,45 C75,55 65,55 60,45 C55,50 45,50 40,45 C35,55 25,55 20,45 Z" /><path d="M30,55 C20,70 10,75 15,90 C20,80 30,75 35,65 Z" /><path d="M70,55 C80,70 90,75 85,90 C80,80 70,75 65,65 Z" /><path d="M42,35 L47,38 L42,40 Z" class="model-accent"/><path d="M58,35 L53,38 L58,40 Z" class="model-accent"/>' },
+
+    { id: 'thunderbird', name: 'Thunderbird', type: 'storm', maxHp: 64,
+      basic: { name: 'Static Peck', dmg: 14 }, special: { name: 'Storm Call', dmg: 27, cost: 2 },
+      passive: 'windRider', passiveDesc: 'Rides the wind with a chance to dodge any attack entirely.',
+      model: '<path d="M50,85 L35,95 L45,80 Z" /><path d="M50,85 L65,95 L55,80 Z" /><path d="M45,45 L15,20 L25,35 L5,40 L30,50 L10,60 L40,60 Z" /><path d="M55,45 L85,20 L75,35 L95,40 L70,50 L90,60 L60,60 Z" /><path d="M45,40 C40,60 45,80 50,90 C55,80 60,60 55,40 Z" /><path d="M45,30 C45,20 55,20 55,30 C55,40 45,40 45,30 Z" /><path d="M55,25 L65,28 L55,31 Z" class="model-accent"/><path d="M52,26 L54,26 L54,28 L52,28 Z" class="model-accent"/>' },
+    { id: 'raiju', name: 'Raiju', type: 'storm', maxHp: 65,
+      basic: { name: 'Spark Bite', dmg: 13 }, special: { name: 'Thunder Fang', dmg: 23, cost: 2 },
+      passive: 'charged', passiveDesc: 'Grows charged with each attack, gaining +3 damage per turn (up to +9).',
+      model: '<path d="M25,35 L20,25 L32,35 Z" /><path d="M30,35 L35,25 L38,38 Z" /><path d="M30,35 C40,40 50,40 60,45 C70,50 80,50 80,60 C80,75 70,80 65,70 C60,60 50,55 40,60 C30,65 25,60 30,50 Z" /><path d="M35,60 L30,85 L40,80 L45,65 Z" /><path d="M65,65 L60,90 L70,85 L75,70 Z" /><path d="M75,55 L85,75 L95,70 L80,55 Z" /><path d="M45,45 L55,65 L65,60 L50,40 Z" /><path d="M20,40 L30,35 L35,45 L25,50 Z" /><path d="M20,40 L10,45 L25,50 Z" /><path d="M40,30 L50,15 L45,35 L55,25 L45,40 Z" class="model-accent"/>' },
+    { id: 'valkyrie', name: 'Valkyrie', type: 'storm', maxHp: 68,
+      basic: { name: 'Spear Thrust', dmg: 13 }, special: { name: 'Judgment', dmg: 22, cost: 2 },
+      passive: 'judgment', passiveDesc: 'Judgment deals 14 bonus damage to a foe below half HP.',
+      model: '<path d="M42,20 C30,10 15,15 25,25 C30,22 35,25 42,25 Z" class="model-accent"/><path d="M58,20 C70,10 85,15 75,25 C70,22 65,25 58,25 Z" class="model-accent"/><path d="M40,40 C35,60 30,85 30,90 L70,90 C70,85 65,60 60,40 Z" /><path d="M38,60 L62,60 L62,65 L38,65 Z" class="model-accent"/><path d="M46,32 L54,32 L54,40 L46,40 Z" /><path d="M42,25 C42,15 58,15 58,25 C58,35 42,35 42,25 Z" /><path d="M40,45 L25,55 L25,60 L40,50 Z" /><path d="M60,45 L75,55 L75,60 L60,50 Z" /><path d="M20,10 L28,10 L26,95 L22,95 Z" class="model-dark"/><path d="M20,10 L24,0 L28,10 Z" class="model-accent"/><path d="M75,55 C65,45 85,45 90,55 C95,65 75,75 75,55 Z" class="model-accent"/>' },
+
+    { id: 'golem', name: 'Golem', type: 'earth', maxHp: 88,
+      basic: { name: 'Boulder Toss', dmg: 13 }, special: { name: 'Seismic Slam', dmg: 24, cost: 2, aoe: true },
+      passive: 'stoneSkin', passiveDesc: 'Stone skin reduces all incoming damage by 4.',
+      model: '<path d="M28,30 L15,40 L20,70 L35,60 Z" /><path d="M72,30 L85,40 L80,70 L65,60 Z" /><path d="M40,62 L35,90 L45,90 L48,62 Z" /><path d="M60,62 L65,90 L55,90 L52,62 Z" /><path d="M30,30 L70,30 L60,60 L40,60 Z" /><path d="M40,15 L60,15 L55,28 L45,28 Z" /><path d="M45,20 L48,25 L42,25 Z" class="model-accent"/><path d="M55,20 L58,25 L52,25 Z" class="model-accent"/><path d="M45,40 L55,40 L50,50 Z" class="model-accent"/>' },
+    { id: 'minotaur', name: 'Minotaur', type: 'earth', maxHp: 78,
+      basic: { name: 'Horn Gore', dmg: 15 }, special: { name: 'Labyrinth Rage', dmg: 22, cost: 2 },
+      passive: 'rage', passiveDesc: 'Enraged below 40% HP, dealing 30% more damage.',
+      model: '<path d="M35,35 C20,35 25,60 40,65 C40,80 35,95 35,95 L45,95 C45,80 50,70 50,70 C50,70 55,80 55,95 L65,95 C65,95 60,80 60,65 C75,60 80,35 65,35 Z" /><path d="M42,20 C42,10 58,10 58,20 C58,35 42,35 42,20 Z" /><path d="M45,28 L55,28 L55,35 L45,35 Z" class="model-accent"/><path d="M42,15 C30,15 20,5 25,5 C30,5 35,10 45,18 Z" class="model-accent"/><path d="M58,15 C70,15 80,5 75,5 C70,5 65,10 55,18 Z" class="model-accent"/>' },
+    { id: 'basilisk', name: 'Basilisk', type: 'earth', maxHp: 60,
+      basic: { name: 'Venom Bite', dmg: 13 }, special: { name: 'Petrifying Gaze', dmg: 22, cost: 2 },
+      passive: 'petrify', passiveDesc: 'Petrifying Gaze may turn the foe to stone, causing it to miss its next turn.',
+      model: '<path d="M20,80 C10,70 30,60 50,60 C70,60 90,70 80,85 C70,100 30,100 20,80 Z" /><path d="M30,70 C20,50 40,40 60,40 C80,40 90,60 70,75 C50,90 40,90 30,70 Z" /><path d="M50,55 C40,40 35,30 40,25 C45,20 55,20 60,35 C65,50 60,65 50,55 Z" /><path d="M35,25 C30,15 45,5 55,15 C60,20 50,30 40,25 Z" /><path d="M36,25 C30,23 24,20 18,19 L10,14 L16,21 L11,26 L19,22 C24,23 30,25 36,26 Z" class="model-accent"/><circle cx="42" cy="15" r="2" class="model-accent"/>' }
+  ];
+
+  var ENHANCED_MOVES = {
+    'phoenix_basic':   { charId: 'phoenix', moveKey: 'basic', dmg: 16, effect: 'phoenix_burn_4', effectDesc: 'Ignites the foe for 4 lingering burn damage for 2 turns.' },
+    'phoenix_special': { charId: 'phoenix', moveKey: 'special', dmg: 32, cost: 2, effect: 'phoenix_heal_10', effectDesc: 'Heals Phoenix for 10 HP upon detonation.' },
+    'ifrit_basic':     { charId: 'ifrit', moveKey: 'basic', dmg: 17, effect: 'ifrit_cinder_bonus', effectDesc: 'Deals +5 bonus damage if target is smoldering.' },
+    'ifrit_special':   { charId: 'ifrit', moveKey: 'special', dmg: 30, cost: 2, aoe: true, effect: 'ifrit_guaranteed_burn', effectDesc: 'Guarantees 10 severe burn for 2 turns (splashes 25% damage to foe\'s bench).' },
+    'salamander_basic':{ charId: 'salamander', moveKey: 'basic', dmg: 18, effect: 'salamander_weaken', effectDesc: 'Weakens the target, halving their next attack.' },
+    'salamander_special':{ charId: 'salamander', moveKey: 'special', dmg: 28, cost: 2, effect: 'salamander_energy_refund', effectDesc: 'Refreshes 1 Energy upon hit.' },
+    'kraken_basic':    { charId: 'kraken', moveKey: 'basic', dmg: 16, effect: 'kraken_leech_6', effectDesc: 'Leeches 6 HP from the target.' },
+    'kraken_special':  { charId: 'kraken', moveKey: 'special', dmg: 28, cost: 2, effect: 'kraken_deep_crush', effectDesc: 'Deals +18 bonus damage if foe is below 40% HP.' },
+    'nixie_basic':     { charId: 'nixie', moveKey: 'basic', dmg: 14, effect: 'nixie_hyper_lure', effectDesc: 'Guarantees the foe is lured, halving their next attack.' },
+    'nixie_special':   { charId: 'nixie', moveKey: 'special', dmg: 30, cost: 2, aoe: true, effect: 'nixie_cleanse_wave', effectDesc: 'Cleanses all debuffs from your active champion (splashes 25% damage to foe\'s bench).' },
+    'leviathan_basic': { charId: 'leviathan', moveKey: 'basic', dmg: 17, effect: 'leviathan_barrier', effectDesc: 'Surges Leviathan with tidal barrier (+4 temp guard armor).' },
+    'leviathan_special':{ charId: 'leviathan', moveKey: 'special', dmg: 30, cost: 2, effect: 'leviathan_abyssal_stun', effectDesc: 'Terrorizes the foe, stunning them for their next turn.' },
+    'dryad_basic':     { charId: 'dryad', moveKey: 'basic', dmg: 16, effect: 'dryad_siphon_6', effectDesc: 'Entangles target, siphoning 6 HP to Dryad.' },
+    'dryad_special':   { charId: 'dryad', moveKey: 'special', dmg: 29, cost: 2, effect: 'dryad_pollen_heal', effectDesc: 'Spreads pollen that heals all active and benched allies for 8 HP.' },
+    'satyr_basic':     { charId: 'satyr', moveKey: 'basic', dmg: 15, effect: 'satyr_melody_energy', effectDesc: 'Plays a resonant tune, granting Satyr +1 Energy.' },
+    'satyr_special':   { charId: 'satyr', moveKey: 'special', dmg: 30, cost: 2, effect: 'satyr_critical_charge', effectDesc: 'Critical impact dealing +35% damage against fortified foes or full HP targets.' },
+    'ent_basic':       { charId: 'ent', moveKey: 'basic', dmg: 16, effect: 'ent_sap_8', effectDesc: 'Saps life from the soil, restoring 8 HP to Ent.' },
+    'ent_special':     { charId: 'ent', moveKey: 'special', dmg: 28, cost: 2, effect: 'ent_heavy_dampen', effectDesc: 'Crushing timber dampens foe’s outgoing damage by 5 for 2 turns.' },
+    'thunderbird_basic':{ charId: 'thunderbird', moveKey: 'basic', dmg: 18, effect: 'tbird_quick_charge', effectDesc: 'Shocks target, gaining +1 charge stack (+3 bonus damage per stack, max +9).' },
+    'thunderbird_special':{ charId: 'thunderbird', moveKey: 'special', dmg: 30, cost: 2, effect: 'tbird_tempest_dodge', effectDesc: 'Summons a gale granting Thunderbird 50% dodge on the next incoming attack.' },
+    'raiju_basic':     { charId: 'raiju', moveKey: 'basic', dmg: 17, effect: 'raiju_double_charge', effectDesc: 'Generates 2 charge stacks simultaneously.' },
+    'raiju_special':   { charId: 'raiju', moveKey: 'special', dmg: 29, cost: 2, effect: 'raiju_energy_drain', effectDesc: 'Paralyzes target, draining 1 Energy from them.' },
+    'valkyrie_basic':  { charId: 'valkyrie', moveKey: 'basic', dmg: 17, effect: 'valk_true_pierce', effectDesc: 'True spear strike that completely ignores armor and defensive passives.' },
+    'valkyrie_special':{ charId: 'valkyrie', moveKey: 'special', dmg: 28, cost: 2, effect: 'valk_divine_judgment', effectDesc: 'Deals +20 bonus damage if foe is below 50% HP.' },
+    'golem_basic':     { charId: 'golem', moveKey: 'basic', dmg: 17, effect: 'golem_rock_fortify', effectDesc: 'Fortifies Golem, granting +5 temp guard armor.' },
+    'golem_special':   { charId: 'golem', moveKey: 'special', dmg: 30, cost: 2, aoe: true, effect: 'golem_ground_shatter', effectDesc: 'Shatters the ground, stunning the foe for 1 turn (splashes 25% damage to foe\'s bench).' },
+    'minotaur_basic':  { charId: 'minotaur', moveKey: 'basic', dmg: 18, effect: 'mino_frenzy_energy', effectDesc: 'Frenzied attack generating +1 Energy.' },
+    'minotaur_special':{ charId: 'minotaur', moveKey: 'special', dmg: 28, cost: 2, effect: 'mino_early_rage', effectDesc: 'Triggers rage damage bonus below 60% HP instead of 40%.' },
+    'basilisk_basic':  { charId: 'basilisk', moveKey: 'basic', dmg: 17, effect: 'basilisk_toxin_6', effectDesc: 'Injects virulent toxin dealing 6 damage per turn for 2 turns.' },
+    'basilisk_special':{ charId: 'basilisk', moveKey: 'special', dmg: 26, cost: 2, effect: 'basilisk_deep_petrify', effectDesc: 'High chance (60%) to turn the foe to solid stone for 1 turn.' },
+    'godzilla_basic':  { charId: 'godzilla', moveKey: 'basic', dmg: 18, effect: 'godzilla_radiation_burn', effectDesc: 'Seares target with radioactive burn for 4 damage per turn for 2 turns.' },
+    'godzilla_special':{ charId: 'godzilla', moveKey: 'special', dmg: 32, cost: 2, aoe: true, effect: 'godzilla_hyper_breath', effectDesc: 'Overcharged atomic blast (splashes 25% damage to foe\'s bench).' }
+  };
+
+  /* TASK 45: Enhanced passive for Godzilla includes upgraded damage reduction */
+  var ABILITY_ENHANCEMENTS = {
+    'phoenix_passive': { charId: 'phoenix', passiveKey: 'rebirth', name: 'Immortal Ashes', desc: 'Once per battle, rises from defeat with 35 HP (up from 20 HP).' },
+    'ifrit_passive': { charId: 'ifrit', passiveKey: 'scorch', name: 'Blazing Combustion', desc: 'Infernal Burst has a 60% chance to scorch the foe for 8 burn damage for 2 turns.' },
+    'salamander_passive': { charId: 'salamander', passiveKey: 'dyingEmber', name: 'Infernal Pyre', desc: 'When it falls, its dying ember scorches the foe for 22 damage (up from 14).' },
+    'kraken_passive': { charId: 'kraken', passiveKey: 'crushingGrip', name: 'Abyssal Constriction', desc: 'Crushing Grip deals +20 bonus damage when targeting a foe below 50% HP.' },
+    'nixie_passive': { charId: 'nixie', passiveKey: 'lure', name: 'Enchanting Melody', desc: 'Siren Song has a 75% chance to lure the foe (halving next attack) and drains 1 Energy.' },
+    'leviathan_passive': { charId: 'leviathan', passiveKey: 'thickHide', name: 'Armored Carapace', desc: 'Reinforced scales reduce all incoming damage by 7 (up from 4).' },
+    'dryad_passive': { charId: 'dryad', passiveKey: 'regrowth', name: 'Verdant Flourish', desc: 'Flourishes with vital sap, regrowing 11 HP at the start of each turn (up from 6).' },
+    'satyr_passive': { charId: 'satyr', passiveKey: 'trickster', name: 'Mischief Master', desc: 'Reed Pipe has a 60% chance to befuddle the foe (halving attack) and grants Satyr +1 Energy.' },
+    'ent_passive': { charId: 'ent', passiveKey: 'ironbark', name: 'Ancient Timber', desc: 'Ancient petrified bark reduces all incoming damage by 8 (up from 5).' },
+    'thunderbird_passive': { charId: 'thunderbird', passiveKey: 'windRider', name: 'Cyclone Wings', desc: 'Soars on cyclone winds with a 35% chance to dodge any incoming attack (up from 20%).' },
+    'raiju_passive': { charId: 'raiju', passiveKey: 'charged', name: 'Overcharged Current', desc: 'Overcharges with electricity, gaining +5 damage per attack (up to +15 total).' },
+    'valkyrie_passive': { charId: 'valkyrie', passiveKey: 'judgment', name: 'Divine Retribution', desc: 'Judgment deals +22 bonus damage when striking a foe below 60% HP.' },
+    'golem_passive': { charId: 'golem', passiveKey: 'stoneSkin', name: 'Granite Aegis', desc: 'Dense granite aegis reduces all incoming damage by 7 (up from 4).' },
+    'minotaur_passive': { charId: 'minotaur', passiveKey: 'rage', name: 'Berserker Bloodlust', desc: 'Enters bloodlust below 50% HP, dealing 50% more damage (up from 30% below 40%).' },
+    'basilisk_passive': { charId: 'basilisk', passiveKey: 'petrify', name: 'Medusa Gaze', desc: 'Petrifying Gaze has a 55% chance to stun and afflicts 4 toxin damage for 2 turns.' },
+    'godzilla_passive': { charId: 'godzilla', passiveKey: 'radiation', name: 'Nuclear Pulse', desc: 'Carapace reduces incoming damage by 7; emits radioactive pulse dealing 7 damage each turn.' }
+  };
+
+  var ACHIEVEMENTS = [
+    { id: 'ach_win_1', category: 'battles', tier: 'Novice', name: 'Novice Duelist', desc: 'Win 5 battles against the realm guardian', target: 5, goldReward: 150, gemReward: 3 },
+    { id: 'ach_win_2', category: 'battles', tier: 'Amateur', name: 'Proven Champion', desc: 'Win 10 battles against the realm guardian', target: 10, goldReward: 300, gemReward: 5 },
+    { id: 'ach_win_3', category: 'battles', tier: 'Veteran', name: 'Veteran Tactician', desc: 'Win 25 battles against the realm guardian', target: 25, goldReward: 600, gemReward: 10 },
+    { id: 'ach_win_4', category: 'battles', tier: 'Master', name: 'Grand Battler', desc: 'Win 50 battles against the realm guardian', target: 50, goldReward: 1200, gemReward: 20 },
+    { id: 'ach_win_5', category: 'battles', tier: 'Legend', name: 'Mythic Sovereign', desc: 'Win 100 battles against the realm guardian', target: 100, goldReward: 2500, gemReward: 40 },
+
+    { id: 'ach_hard_1', category: 'hardMode', tier: 'Novice', name: 'Trial Initiate', desc: 'Conquer 1 Hard Mode battle trial', target: 1, goldReward: 200, gemReward: 4 },
+    { id: 'ach_hard_2', category: 'hardMode', tier: 'Veteran', name: 'Veteran Vanquisher', desc: 'Conquer 3 Hard Mode battle trials', target: 3, goldReward: 400, gemReward: 7 },
+    { id: 'ach_hard_3', category: 'hardMode', tier: 'Champion', name: 'Mythic Conqueror', desc: 'Conquer 5 Hard Mode battle trials', target: 5, goldReward: 800, gemReward: 15 },
+    { id: 'ach_hard_4', category: 'hardMode', tier: 'Master', name: 'Dread Sovereign', desc: 'Conquer 10 Hard Mode battle trials', target: 10, goldReward: 1500, gemReward: 25 },
+    { id: 'ach_hard_5', category: 'hardMode', tier: 'Legend', name: 'Immortal Conqueror', desc: 'Conquer 25 Hard Mode battle trials', target: 25, goldReward: 3000, gemReward: 50 },
+
+    { id: 'ach_atk_1', category: 'attacks', tier: 'Initiate', name: 'Technique Initiate', desc: 'Awaken 5 enhanced attack techniques', target: 5, goldReward: 150, gemReward: 3 },
+    { id: 'ach_atk_2', category: 'attacks', tier: 'Adept', name: 'Technique Adept', desc: 'Awaken 10 enhanced attack techniques', target: 10, goldReward: 300, gemReward: 5 },
+    { id: 'ach_atk_3', category: 'attacks', tier: 'Expert', name: 'Technique Expert', desc: 'Awaken 20 enhanced attack techniques', target: 20, goldReward: 600, gemReward: 10 },
+    { id: 'ach_atk_4', category: 'attacks', tier: 'Archmage', name: 'Grand Technologist', desc: 'Awaken all 30 enhanced attack techniques', target: 30, goldReward: 1500, gemReward: 25 },
+
+    { id: 'ach_abi_1', category: 'abilities', tier: 'Awakening', name: 'Dormant Spark', desc: 'Awaken 3 passive ability enhancements', target: 3, goldReward: 150, gemReward: 3 },
+    { id: 'ach_abi_2', category: 'abilities', tier: 'Ascended', name: 'Ascended Might', desc: 'Awaken 7 passive ability enhancements', target: 7, goldReward: 350, gemReward: 6 },
+    { id: 'ach_abi_3', category: 'abilities', tier: 'Mythic', name: 'Ancient Lineage', desc: 'Awaken 12 passive ability enhancements', target: 12, goldReward: 700, gemReward: 12 },
+    { id: 'ach_abi_4', category: 'abilities', tier: 'Transcendent', name: 'Transcendent Essence', desc: 'Awaken all 15 passive ability enhancements', target: 15, goldReward: 1500, gemReward: 25 },
+
+    { id: 'ach_qst_1', category: 'quests', tier: 'Errand Runner', name: 'Errand Runner', desc: 'Fulfill 5 daily quest decrees', target: 5, goldReward: 150, gemReward: 3 },
+    { id: 'ach_qst_2', category: 'quests', tier: 'Town Courier', name: 'Town Courier', desc: 'Fulfill 15 daily quest decrees', target: 15, goldReward: 350, gemReward: 6 },
+    { id: 'ach_qst_3', category: 'quests', tier: 'Guild Envoy', name: 'Guild Envoy', desc: 'Fulfill 30 daily quest decrees', target: 30, goldReward: 700, gemReward: 12 },
+    { id: 'ach_qst_4', category: 'quests', tier: 'Grand Inquisitor', name: 'Realm Inquisitor', desc: 'Fulfill 60 daily quest decrees', target: 60, goldReward: 1500, gemReward: 25 }
+  ];
+
+  var EFFECT_REGISTRY = {
+    preDamage: {
+      'satyr_critical_charge': function (ctx) {
+        var def = ctx.defender;
+        var isFortified = !!(def.flags.tempArmor || def.template.passive === 'thickHide' || def.template.passive === 'ironbark' || def.template.passive === 'stoneSkin' || def.template.passive === 'radiationAura' || def.template.passive === 'radiation');
+        var isFullHp = (def.curHp === def.template.maxHp);
+        if (isFortified || isFullHp) {
+          ctx.dmg = Math.round(ctx.dmg * 1.35);
+          logMsg(ctx.attacker.template.name + '’s Critical Charge delivers an amplified strike (+35% damage)!');
+        }
+      },
+      'ifrit_cinder_bonus': function (ctx) {
+        if (ctx.defender.flags.burnTurns > 0 || ctx.defender.flags.burnDmg > 0) {
+          ctx.dmg += 5;
+          logMsg(ctx.attacker.template.name + ' ignites burning embers (+5 bonus damage)!');
+        }
+      }
+    },
+    postDamage: {
+      'phoenix_burn_4': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          applyBurn(ctx.defender, 4, 2);
+          logMsg(ctx.defender.template.name + ' is engulfed in lingering flames for 2 turns!');
+        }
+      },
+      'phoenix_heal_10': function (ctx) {
+        var heal = Math.min(10, ctx.attacker.template.maxHp - ctx.attacker.curHp);
+        ctx.attacker.curHp += heal;
+        logMsg(ctx.attacker.template.name + ' detonates with fiery vitality, restoring ' + heal + ' HP!');
+      },
+      'ifrit_guaranteed_burn': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          applyBurn(ctx.defender, 10, 2);
+          logMsg(ctx.defender.template.name + ' is severely scorched by infernal fire for 2 turns!');
+        }
+      },
+      'salamander_weaken': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          ctx.defender.flags.weakenNext = true;
+          logMsg(ctx.defender.template.name + ' is thrown off-balance (next attack halved)!');
+        }
+      },
+      'salamander_energy_refund': function (ctx) {
+        ctx.attacker.energy = Math.min(3, ctx.attacker.energy + 1);
+        logMsg(ctx.attacker.template.name + ' absorbs molten heat (+1 Energy)!');
+      },
+      'kraken_leech_6': function (ctx) {
+        var heal = Math.min(6, ctx.attacker.template.maxHp - ctx.attacker.curHp);
+        ctx.attacker.curHp += heal;
+        logMsg(ctx.attacker.template.name + ' drains life, healing for ' + heal + ' HP.');
+      },
+      'nixie_hyper_lure': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          ctx.defender.flags.weakenNext = true;
+          logMsg(ctx.defender.template.name + ' is utterly mesmerized (next attack halved)!');
+        }
+      },
+      'nixie_cleanse_wave': function (ctx) {
+        ctx.attacker.flags = {};
+        logMsg('A purifying tide cleanses ' + ctx.attacker.template.name + ' of all debuffs!');
+      },
+      'leviathan_barrier': function (ctx) {
+        ctx.attacker.flags.tempArmor = 4;
+        logMsg(ctx.attacker.template.name + ' erects a protective tidal barrier (+4 Guard)!');
+      },
+      'leviathan_abyssal_stun': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          ctx.defender.flags.stunned = true;
+          logMsg(ctx.defender.template.name + ' is stunned by the abyssal roar!');
+        }
+      },
+      'dryad_siphon_6': function (ctx) {
+        var heal = Math.min(6, ctx.attacker.template.maxHp - ctx.attacker.curHp);
+        ctx.attacker.curHp += heal;
+        logMsg(ctx.attacker.template.name + ' siphons vital energy, recovering ' + heal + ' HP.');
+      },
+      'dryad_pollen_heal': function (ctx) {
+        var party = ctx.side === 'player' ? state.player.roster : state.ai.roster;
+        party.forEach(function (c) {
+          if (c.curHp > 0) c.curHp = Math.min(c.template.maxHp, c.curHp + 8);
+        });
+        logMsg('Regenerative spores bloom, healing the entire party for 8 HP!');
+      },
+      'satyr_melody_energy': function (ctx) {
+        ctx.attacker.energy = Math.min(3, ctx.attacker.energy + 1);
+        logMsg(ctx.attacker.template.name + ' plays a resonant tune (+1 Energy)!');
+      },
+      'ent_sap_8': function (ctx) {
+        var heal = Math.min(8, ctx.attacker.template.maxHp - ctx.attacker.curHp);
+        ctx.attacker.curHp += heal;
+        logMsg(ctx.attacker.template.name + ' absorbs nutrients, regaining ' + heal + ' HP.');
+      },
+      'ent_heavy_dampen': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          ctx.defender.flags.dampenTurns = 2;
+          ctx.defender.flags.dampenAmount = 5;
+          logMsg(ctx.defender.template.name + ' is dampened by heavy timber (-5 damage for 2 turns)!');
+        }
+      },
+      'tbird_quick_charge': function (ctx) {
+        ctx.attacker.flags.chargeStacks = Math.min(3, (ctx.attacker.flags.chargeStacks || 0) + 1);
+        logMsg(ctx.attacker.template.name + ' crackles with instant lightning charge (+1 Charge Stack, ' + ctx.attacker.flags.chargeStacks + '/3)!');
+      },
+      'tbird_tempest_dodge': function (ctx) {
+        ctx.attacker.flags.tempestDodge = true;
+        logMsg(ctx.attacker.template.name + ' is cloaked by tempest winds (50% dodge on next incoming attack)!');
+      },
+      'raiju_double_charge': function (ctx) {
+        ctx.attacker.flags.chargeStacks = Math.min(3, (ctx.attacker.flags.chargeStacks || 0) + 2);
+        logMsg(ctx.attacker.template.name + ' charges +2 static sparks (' + ctx.attacker.flags.chargeStacks + '/3)!');
+      },
+      'raiju_energy_drain': function (ctx) {
+        if (ctx.defender.energy > 0) {
+          ctx.defender.energy = Math.max(0, ctx.defender.energy - 1);
+          logMsg(ctx.defender.template.name + ' loses 1 Energy to electrical paralysis!');
+        }
+      },
+      'golem_rock_fortify': function (ctx) {
+        ctx.attacker.flags.tempArmor = 5;
+        logMsg(ctx.attacker.template.name + ' armors up with dense granite (+5 Guard)!');
+      },
+      'golem_ground_shatter': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          ctx.defender.flags.stunned = true;
+          logMsg('The shattered earth pins and stuns ' + ctx.defender.template.name + '!');
+        }
+      },
+      'mino_frenzy_energy': function (ctx) {
+        ctx.attacker.energy = Math.min(3, ctx.attacker.energy + 1);
+        logMsg(ctx.attacker.template.name + ' surges with momentum (+1 Energy)!');
+      },
+      'basilisk_toxin_6': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          applyBurn(ctx.defender, 6, 2);
+          logMsg(ctx.defender.template.name + ' is afflicted with virulent poison for 2 turns!');
+        }
+      },
+      'basilisk_deep_petrify': function (ctx) {
+        if (ctx.defender.curHp > 0 && Math.random() < 0.6) {
+          ctx.defender.flags.stunned = true;
+          logMsg(ctx.defender.template.name + ' is turned to solid stone!');
+        }
+      },
+      'godzilla_radiation_burn': function (ctx) {
+        if (ctx.defender.curHp > 0) {
+          applyBurn(ctx.defender, 4, 2);
+          logMsg(ctx.defender.template.name + ' is scorched by radioactive burn for 2 turns!');
+        }
+      }
+    }
+  };
+
+  var state = null;
+
+  function ensureCreatureRosterSync(godzillaUnlocked) {
+    var hasGodzilla = CREATURES.some(function (c) { return c.id === 'godzilla'; });
+    if (godzillaUnlocked && !hasGodzilla) {
+      CREATURES.push(PLAYABLE_GODZILLA);
+    } else if (!godzillaUnlocked && hasGodzilla) {
+      var idx = CREATURES.findIndex(function (c) { return c.id === 'godzilla'; });
+      if (idx >= 0) CREATURES.splice(idx, 1);
+    }
+  }
+
+  function getLevelTierClass(level) {
+    var lvl = level || 1;
+    if (lvl <= 4) return 'level-tier-1';
+    if (lvl <= 9) return 'level-tier-2';
+    if (lvl <= 14) return 'level-tier-3';
+    if (lvl <= 19) return 'level-tier-4';
+    return 'level-tier-5';
+  }
+
+  function getXpRequiredForLevel(level) {
+    return 100 + (level - 1) * 20;
+  }
+
+  function getTodayDateStr() {
+    var now = new Date();
+    return now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
+  }
+
+  function generateDailyQuests(dateStr) {
+    var d = dateStr || getTodayDateStr();
+    var sC = shuffle(CREATURES.slice()), sT = shuffle(['fire', 'water', 'grass', 'storm', 'earth']);
+    return [
+      { id: 'q_' + d + '_1', tier: 'Easy', type: 'use_char', targetKey: sC[0].id, targetName: sC[0].name, desc: 'Attack 3 times with ' + sC[0].name, target: 3, progress: 0, goldReward: 100, gemReward: 3, completed: false, claimed: false, isHard: false },
+      { id: 'q_' + d + '_2', tier: 'Medium', type: 'defeat_type', targetKey: sT[0], targetName: TYPE_META[sT[0]].label, desc: 'Defeat 4 ' + TYPE_META[sT[0]].label + '-element enemies', target: 4, progress: 0, goldReward: 200, gemReward: 6, completed: false, claimed: false, isHard: false },
+      { id: 'q_' + d + '_3', tier: 'Hard', type: 'win_battle', targetKey: null, targetName: null, desc: 'Achieve victory in 2 battles', target: 2, progress: 0, goldReward: 300, gemReward: 10, completed: false, claimed: false, isHard: false }
+    ];
+  }
+
+  /* TASK 46: Decreased hard mode quest rewards by 35% */
+  function generateHardModeQuests(dateStr) {
+    var d = dateStr || getTodayDateStr();
+    var sC = shuffle(CREATURES.slice()), sT = shuffle(['fire', 'water', 'grass', 'storm', 'earth']);
+    return [
+      { id: 'hq_' + d + '_1', tier: 'Easy', type: 'use_char', targetKey: sC[0].id, targetName: sC[0].name, desc: 'Attack 3 times with ' + sC[0].name + ' in Hard Mode', target: 3, progress: 0, goldReward: 98, gemReward: 3, completed: false, claimed: false, isHard: true },
+      { id: 'hq_' + d + '_2', tier: 'Medium', type: 'defeat_type', targetKey: sT[0], targetName: TYPE_META[sT[0]].label, desc: 'Defeat 4 ' + TYPE_META[sT[0]].label + '-element enemies in Hard Mode', target: 4, progress: 0, goldReward: 195, gemReward: 6, completed: false, claimed: false, isHard: true },
+      { id: 'hq_' + d + '_3', tier: 'Hard', type: 'win_battle', targetKey: null, targetName: null, desc: 'Achieve victory in 2 Hard Mode battles', target: 2, progress: 0, goldReward: 293, gemReward: 10, completed: false, claimed: false, isHard: true }
+    ];
+  }
+
+  function trackQuestProgress(type, key, amount) {
+    var isHard = (state.difficulty === 'hard');
+    if (!isHard && state.playerLevel < 5) return;
+    if (isHard && state.playerLevel < 10) return;
+
+    var activeQuests = isHard ? state.hardModeQuests : state.quests;
+    if (!activeQuests || !activeQuests.length) return;
+    var changed = false, inc = amount || 1;
+    activeQuests.forEach(function (q) {
+      if (q.completed) return;
+      var match = (q.type === type) && ((q.type === 'use_char' && q.targetKey === key) || (q.type === 'defeat_type' && q.targetKey === key) || (q.type === 'win_battle'));
+      if (match) {
+        q.progress = Math.min(q.target, q.progress + inc);
+        if (q.progress >= q.target) {
+          q.completed = true;
+          state.totalQuestsCompleted = (state.totalQuestsCompleted || 0) + 1;
+        }
+        changed = true;
+      }
+    });
+    if (changed) saveGameData();
+  }
+
+  function claimQuestReward(questId) {
+    var isHard = (questId.indexOf('hq_') === 0);
+    if (!isHard && state.playerLevel < 5) return;
+    if (isHard && state.playerLevel < 10) return;
+
+    var quest = (state.quests && state.quests.find(function(q) { return q.id === questId; })) ||
+                (state.hardModeQuests && state.hardModeQuests.find(function(q) { return q.id === questId; }));
+    if (!quest || !quest.completed || quest.claimed) return;
+    quest.claimed = true;
+    state.gold += quest.goldReward;
+    state.gems += quest.gemReward;
+    saveGameData();
+    render();
+  }
+
+  function getAchievementCurrentProgress(ach) {
+    if (ach.category === 'battles') return state.totalBattlesWon || 0;
+    if (ach.category === 'hardMode') return state.totalHardModeWins || 0;
+    if (ach.category === 'attacks') return Object.keys(state.unlockedEnhanced || {}).length;
+    if (ach.category === 'abilities') return Object.keys(state.unlockedAbilities || {}).length;
+    if (ach.category === 'quests') return state.totalQuestsCompleted || 0;
+    return 0;
+  }
+
+  function claimAchievementReward(achId) {
+    var ach = ACHIEVEMENTS.find(function(a) { return a.id === achId; });
+    if (!ach || state.claimedAchievements[achId]) return;
+    var cur = getAchievementCurrentProgress(ach);
+    if (cur < ach.target) return;
+
+    state.claimedAchievements[achId] = true;
+    state.gold += ach.goldReward;
+    state.gems += ach.gemReward;
+    saveGameData();
+    render();
+  }
+
+  function loadSaveData() {
+    var data = { 
+      playerName: 'Champion',
+      playerLevel: 1,
+      playerXp: 0,
+      gold: 0, potions: 0, atkPotions: 0, shieldPotions: 0, energyPotions: 0, gems: 0, 
+      summonStep: 1, unlockedEnhanced: {}, dupeStreak: 0,
+      abilitySummonStep: 1, unlockedAbilities: {}, abilityDupeStreak: 0,
+      lastQuestDate: '', quests: [], hardModeQuests: [],
+      totalBattlesWon: 0, totalHardModeWins: 0, totalQuestsCompleted: 0, claimedAchievements: {},
+      godzillaUnlocked: false
+    };
+    try {
+      var stored = localStorage.getItem('codex_save');
+      if (stored) {
+        var parsed = JSON.parse(stored);
+        Object.assign(data, parsed);
+        data.claimedAchievements = data.claimedAchievements || {};
+        if (!data.playerName || typeof data.playerName !== 'string') data.playerName = 'Champion';
+        data.playerLevel = Math.max(1, parseInt(data.playerLevel, 10) || 1);
+        data.playerXp = Math.max(0, parseInt(data.playerXp, 10) || 0);
+        data.godzillaUnlocked = !!data.godzillaUnlocked;
+      }
+    } catch (e) {
+      if (state) state.storageError = true;
+    }
+    ensureCreatureRosterSync(data.godzillaUnlocked);
+    return data;
+  }
+
+  function saveGameData() {
+    try {
+      localStorage.setItem('codex_save', JSON.stringify({ 
+        playerName: state.playerName,
+        playerLevel: state.playerLevel,
+        playerXp: state.playerXp,
+        gold: state.gold, potions: state.potions, atkPotions: state.atkPotions, shieldPotions: state.shieldPotions, energyPotions: state.energyPotions,
+        gems: state.gems, summonStep: state.summonStep, unlockedEnhanced: state.unlockedEnhanced, dupeStreak: state.dupeStreak,
+        abilitySummonStep: state.abilitySummonStep, unlockedAbilities: state.unlockedAbilities, abilityDupeStreak: state.abilityDupeStreak,
+        lastQuestDate: state.lastQuestDate, quests: state.quests, hardModeQuests: state.hardModeQuests,
+        totalBattlesWon: state.totalBattlesWon, totalHardModeWins: state.totalHardModeWins, totalQuestsCompleted: state.totalQuestsCompleted, claimedAchievements: state.claimedAchievements,
+        godzillaUnlocked: !!state.godzillaUnlocked
+      }));
+    } catch (e) {
+      state.storageError = true;
+    }
+  }
+
+  function freshState() {
+    var saved = loadSaveData();
+    var todayStr = getTodayDateStr();
+    var quests = saved.quests;
+    var hardQuests = saved.hardModeQuests;
+    var lastDate = saved.lastQuestDate;
+
+    if (!quests || !quests.length || !hardQuests || !hardQuests.length || lastDate !== todayStr) {
+      quests = generateDailyQuests(todayStr);
+      hardQuests = generateHardModeQuests(todayStr);
+      lastDate = todayStr;
+    }
+
+    return Object.assign({
+      playerName: saved.playerName || 'Champion',
+      playerLevel: saved.playerLevel || 1,
+      playerXp: saved.playerXp || 0,
+      screen: 'title',
+      difficulty: 'normal',
+      isBossFight: false,
+      potionsUsedThisBattle: 0, /* TASK 44: Tracks potion count for boss fight cap */
+      selectedIds: [],
+      player: { roster: [], active: null },
+      ai: { roster: [], active: null },
+      turn: 'player',
+      busy: false,
+      log: [],
+      winner: null,
+      endMessage: null,
+      pendingChoice: null,
+      pendingEndTurnSide: null,
+      showGuide: false,
+      showForfeit: false,
+      showResetModal: false,
+      showNameModal: false,
+      showItemsModal: false,
+      levelUpModalData: null,
+      bossUnlockModal: false,
+      storageError: false,
+      indexFilter: 'all',
+      achieveFilter: 'all',
+      altarTab: 'attacks',
+      recentSummon: null,
+      atkBuffTurns: 0,
+      shieldBuffTurns: 0,
+      earnedGold: 0,
+      earnedGems: 0,
+      earnedXp: 0,
+      godzillaUnlocked: saved.godzillaUnlocked || false
+    }, saved, { lastQuestDate: lastDate, quests: quests, hardModeQuests: hardQuests });
+  }
+
+  function applyBurn(target, amount, turns) {
+    if (!target || target.curHp <= 0) return;
+    target.flags.burnDmg = Math.max(target.flags.burnDmg || 0, amount);
+    target.flags.burnTurns = Math.max(target.flags.burnTurns || 0, turns || 1);
+  }
+
+  function getInstMove(inst, moveKey, isPlayer) {
+    if (!inst || !inst.template) return { name: '', dmg: 0, cost: 0, effectDesc: null, isEnhanced: false, aoe: false };
+    var t = inst.template;
+    var key = t.id + '_' + moveKey;
+    var baseMove = t[moveKey];
+    var isEnhanced = false;
+
+    if (isPlayer) {
+      isEnhanced = !!(state && state.unlockedEnhanced && state.unlockedEnhanced[key]);
+    } else {
+      isEnhanced = !!(inst.aiEnhancedMoves && inst.aiEnhancedMoves[moveKey]);
+    }
+
+    if (isEnhanced && ENHANCED_MOVES[key]) {
+      var enh = ENHANCED_MOVES[key];
+      return {
+        name: baseMove.name,
+        dmg: enh.dmg,
+        cost: enh.cost !== undefined ? enh.cost : baseMove.cost,
+        effect: enh.effect,
+        effectDesc: enh.effectDesc,
+        aoe: enh.aoe !== undefined ? enh.aoe : !!baseMove.aoe,
+        isEnhanced: true
+      };
+    }
+    return {
+      name: baseMove.name,
+      dmg: baseMove.dmg,
+      cost: baseMove.cost,
+      effectDesc: null,
+      aoe: !!baseMove.aoe,
+      isEnhanced: false
+    };
+  }
+
+  function getCreatureMove(creatureId, moveKey) {
+    var key = creatureId + '_' + moveKey;
+    var baseTemplate = (creatureId === 'godzilla_boss' ? BOSSES[0] : CREATURES.find(function(c) { return c.id === creatureId; }));
+    if (!baseTemplate) return { name: '', dmg: 0, cost: 0, effectDesc: null, isEnhanced: false, aoe: false };
+
+    var baseMove = baseTemplate[moveKey];
+    var isEnhanced = !!(state && state.unlockedEnhanced && state.unlockedEnhanced[key]);
+    if (isEnhanced && ENHANCED_MOVES[key]) {
+      var enh = ENHANCED_MOVES[key];
+      return {
+        name: baseMove.name,
+        dmg: enh.dmg,
+        cost: enh.cost !== undefined ? enh.cost : baseMove.cost,
+        effect: enh.effect,
+        effectDesc: enh.effectDesc,
+        aoe: enh.aoe !== undefined ? enh.aoe : !!baseMove.aoe,
+        isEnhanced: true
+      };
+    }
+    return {
+      name: baseMove.name,
+      dmg: baseMove.dmg,
+      cost: baseMove.cost,
+      effectDesc: null,
+      aoe: !!baseMove.aoe,
+      isEnhanced: false
+    };
+  }
+
+  function isPassiveEnhanced(inst, side) {
+    if (!inst || !inst.template) return false;
+    if (side === 'player') {
+      return !!(state && state.unlockedAbilities && state.unlockedAbilities[inst.template.id + '_passive']);
+    } else {
+      return !!inst.aiEnhancedAbility;
+    }
+  }
+
+  function getCreaturePassive(creatureId) {
+    var key = creatureId + '_passive';
+    var baseTemplate = (creatureId === 'godzilla_boss' ? BOSSES[0] : CREATURES.find(function(c) { return c.id === creatureId; }));
+    if (!baseTemplate) return { name: 'Passive', desc: '', isEnhanced: false };
+
+    var isEnhanced = !!(state && state.unlockedAbilities && state.unlockedAbilities[key]);
+    if (isEnhanced && ABILITY_ENHANCEMENTS[key]) {
+      var enh = ABILITY_ENHANCEMENTS[key];
+      return { name: enh.name, desc: enh.desc, isEnhanced: true };
+    }
+    return { name: 'Passive', desc: baseTemplate.passiveDesc, isEnhanced: false };
+  }
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function logMsg(text) { state.log.push(text); }
+  function makeInstance(template) { return { template: template, curHp: template.maxHp, energy: 0, flags: {}, aiEnhancedMoves: null, aiEnhancedAbility: false }; }
+
+  function tryReviveOrFall(inst, side) {
+    var isRebirthEnhanced = isPassiveEnhanced(inst, side);
+
+    if (inst.template.passive === 'rebirth' && !inst.flags.revived) {
+      inst.flags.revived = true;
+      var reviveHp = isRebirthEnhanced ? 35 : 20;
+      inst.curHp = reviveHp;
+      logMsg(inst.template.name + ' rises from the ashes, reborn with ' + reviveHp + ' HP!' + (isRebirthEnhanced ? ' (★ Awakened Ashes)' : ''));
+      return true;
+    }
+    inst.curHp = 0;
+    logMsg(inst.template.name + ' has fallen!');
+    
+    if (side === 'ai') trackQuestProgress('defeat_type', inst.template.type, 1);
+
+    if (inst.template.passive === 'dyingEmber') {
+      var foe = state[side === 'player' ? 'ai' : 'player'].active;
+      if (foe && foe.curHp > 0) {
+        var isEmberEnhanced = isPassiveEnhanced(inst, side);
+        var dmg = isEmberEnhanced ? 22 : 14;
+        foe.curHp = Math.max(1, foe.curHp - dmg);
+        logMsg(inst.template.name + "'s dying ember scorches " + foe.template.name + ' for ' + dmg + '!' + (isEmberEnhanced ? ' (★ Infernal Pyre)' : ''));
+      }
+    }
+    return false;
+  }
+
+  function checkAndHandleFaint(inst, side) {
+    if (!inst || inst.curHp > 0) return;
+    if (!tryReviveOrFall(inst, side)) {
+      if (state[side].active === inst) state[side].active = null;
+    }
+  }
+
+  function aiPickBest(bench, defenderActive) {
+    if (!bench.length) return null;
+    if (!defenderActive) return bench[Math.floor(Math.random() * bench.length)];
+    var best = [], bestScore = -Infinity;
+    bench.forEach(function (c) {
+      var score = (EFFECTIVENESS[c.template.type] && EFFECTIVENESS[c.template.type][defenderActive.template.type]) || 1;
+      if (score > bestScore) { bestScore = score; best = [c]; }
+      else if (score === bestScore) { best.push(c); }
+    });
+    return best[Math.floor(Math.random() * best.length)];
+  }
+
+  function fillEmptyActives() {
+    if (state.player.active === null) {
+      var pBench = state.player.roster.filter(function (c) { return c.curHp > 0; });
+      if (pBench.length === 0) {
+        state.winner = 'ai';
+        state.screen = 'end';
+        state.showItemsModal = false;
+        state.earnedGold = 0;
+        state.earnedGems = 0;
+        state.earnedXp = 0;
+        state.endMessage = getRandomItem(DEFEAT_MSGS);
+      } else {
+        state.pendingChoice = 'replace-player';
+      }
+    }
+    if (state.screen === 'end') return true;
+    
+    if (state.ai.active === null) {
+      var aBench = state.ai.roster.filter(function (c) { return c.curHp > 0; });
+      if (aBench.length === 0) {
+        state.winner = 'player';
+        state.screen = 'end';
+        state.showItemsModal = false;
+
+        if (state.isBossFight) {
+          state.endMessage = "You brought down the ancient titan Godzilla! The King of Monsters yields to your mastery!";
+          state.earnedGold = 500;
+          state.earnedGems = 25;
+          state.earnedXp = 600;
+          if (!state.godzillaUnlocked) {
+            state.godzillaUnlocked = true;
+            ensureCreatureRosterSync(true);
+            state.bossUnlockModal = true;
+          }
+        } else {
+          state.endMessage = getRandomItem(VICTORY_MSGS);
+
+          if (state.difficulty === 'hard') {
+            state.earnedGold = Math.floor(Math.random() * 151) + 100;
+            state.earnedGems = Math.floor(Math.random() * 6) + 5;
+            state.earnedXp = Math.floor(Math.random() * 61) + 260;
+            state.totalHardModeWins = (state.totalHardModeWins || 0) + 1;
+          } else {
+            state.earnedGold = Math.floor(Math.random() * 26) + 25; 
+            state.earnedGems = Math.floor(Math.random() * 3) + 1;
+            state.earnedXp = Math.floor(Math.random() * 26) + 105;
+          }
+        }
+
+        state.gold += state.earnedGold;
+        state.gems += state.earnedGems;
+        state.playerXp = (state.playerXp || 0) + state.earnedXp;
+
+        // Process Level-ups
+        var startLevel = state.playerLevel || 1;
+        while (state.playerXp >= getXpRequiredForLevel(state.playerLevel)) {
+          state.playerXp -= getXpRequiredForLevel(state.playerLevel);
+          state.playerLevel++;
+        }
+
+        if (state.playerLevel > startLevel) {
+          state.levelUpModalData = {
+            oldLevel: startLevel,
+            newLevel: state.playerLevel,
+            unlockedLvl5Features: (startLevel < 5 && state.playerLevel >= 5),
+            unlockedHard: (startLevel < 10 && state.playerLevel >= 10)
+          };
+        }
+
+        state.totalBattlesWon = (state.totalBattlesWon || 0) + 1;
+        trackQuestProgress('win_battle', null, 1);
+        saveGameData();
+      } else {
+        var pick = aiPickBest(aBench, state.player.active);
+        state.ai.active = pick;
+        logMsg('The Mysterious Being sends out ' + pick.template.name + '!');
+      }
+    }
+    return state.screen === 'end';
+  }
+
+  function resolveAttack(side, moveKey) {
+    var otherSide = side === 'player' ? 'ai' : 'player';
+    var attacker = state[side].active;
+    var defender = state[otherSide].active;
+    if (!attacker || !defender) return;
+    
+    var isPlayerAttacker = (side === 'player');
+
+    if (side === 'player') trackQuestProgress('use_char', attacker.template.id, 1);
+
+    var move = getInstMove(attacker, moveKey, isPlayerAttacker);
+    var isSpecial = moveKey === 'special';
+    if (isSpecial) {
+      if (attacker.energy < move.cost) return;
+      attacker.energy -= move.cost;
+    }
+
+    var dmg = move.dmg;
+    var eff = (EFFECTIVENESS[attacker.template.type] && EFFECTIVENESS[attacker.template.type][defender.template.type]) || 1;
+    dmg = Math.round(dmg * eff);
+
+    if (side === 'player' && state.atkBuffTurns > 0) dmg = Math.round(dmg * 1.20);
+    if (attacker.flags.dampenTurns > 0) dmg = Math.max(1, dmg - (attacker.flags.dampenAmount || 5));
+
+    if (otherSide === 'player' && state.shieldBuffTurns > 0) {
+      dmg = Math.round(dmg * 0.65);
+      logMsg('🛡️ Shield Potion wards ' + defender.template.name + ' (incoming damage reduced by 35%)!');
+    }
+
+    if (attacker.template.passive === 'crushingGrip' && isSpecial) {
+      var isKrakenEnh = isPassiveEnhanced(attacker, side);
+      var thresh = isKrakenEnh ? 0.5 : (move.isEnhanced ? 0.4 : 0.3);
+      var bonus = isKrakenEnh ? 20 : (move.isEnhanced ? 18 : 12);
+      if (defender.curHp / defender.template.maxHp < thresh) dmg += bonus;
+    }
+    if (attacker.template.passive === 'judgment' && isSpecial) {
+      var isValkEnh = isPassiveEnhanced(attacker, side);
+      var valkThresh = isValkEnh ? 0.6 : 0.5;
+      var valkBonus = isValkEnh ? 22 : (move.isEnhanced ? 20 : 14);
+      if (defender.curHp / defender.template.maxHp < valkThresh) dmg += valkBonus;
+    }
+    
+    if (attacker.template.passive === 'charged' || attacker.flags.chargeStacks) {
+      var isRaijuEnh = isPassiveEnhanced(attacker, side);
+      var perStack = (attacker.template.passive === 'charged' && isRaijuEnh) ? 5 : 3;
+      var stacks = Math.min(attacker.flags.chargeStacks || 0, 3);
+      if (stacks > 0) {
+        dmg += stacks * perStack;
+        logMsg(attacker.template.name + ' unleashes electrical charge (+' + (stacks * perStack) + ' bonus dmg)!');
+      }
+    }
+
+    if (attacker.template.passive === 'rage') {
+      var isMinoEnh = isPassiveEnhanced(attacker, side);
+      if (attacker.curHp / attacker.template.maxHp < (isMinoEnh ? 0.5 : (move.isEnhanced ? 0.6 : 0.4))) dmg = Math.round(dmg * (isMinoEnh ? 1.5 : 1.3));
+    }
+    if (attacker.flags.weakenNext) {
+      dmg = Math.round(dmg / 2);
+      attacker.flags.weakenNext = false;
+      logMsg(attacker.template.name + "'s attack is weakened by a lingering hex!");
+    }
+
+    var ctx = { side: side, attacker: attacker, defender: defender, move: move, dmg: dmg, isSpecial: isSpecial, eff: eff };
+
+    if (move.effect && EFFECT_REGISTRY.preDamage[move.effect]) {
+      EFFECT_REGISTRY.preDamage[move.effect](ctx);
+      dmg = ctx.dmg;
+    }
+
+    var isTbirdEnh = isPassiveEnhanced(defender, otherSide);
+    var dodged = false, dodgeChance = 0;
+    if (defender.flags.tempestDodge) {
+      dodgeChance = 0.5;
+      defender.flags.tempestDodge = false;
+    } else if (defender.template.passive === 'windRider') {
+      dodgeChance = isTbirdEnh ? 0.35 : 0.2;
+    }
+
+    if (Math.random() < dodgeChance) {
+      logMsg(attacker.template.name + ' uses ' + move.name + ', but ' + defender.template.name + ' gracefully dodges on the wind!' + (isTbirdEnh ? ' (★ Cyclone Wings)' : ''));
+    } else {
+      if (move.effect !== 'valk_true_pierce') {
+        if (defender.template.passive === 'thickHide') dmg = Math.max(1, dmg - (isPassiveEnhanced(defender, otherSide) ? 7 : 4));
+        if (defender.template.passive === 'ironbark') dmg = Math.max(1, dmg - (isPassiveEnhanced(defender, otherSide) ? 8 : 5));
+        if (defender.template.passive === 'stoneSkin') dmg = Math.max(1, dmg - (isPassiveEnhanced(defender, otherSide) ? 7 : 4));
+        if (defender.template.passive === 'radiationAura') dmg = Math.max(1, dmg - 5);
+        /* TASK 45: Playable Godzilla damage reduction of 4 (enhanced to 7) */
+        if (defender.template.passive === 'radiation') dmg = Math.max(1, dmg - (isPassiveEnhanced(defender, otherSide) ? 7 : 4));
+        if (defender.flags.tempArmor) {
+          dmg = Math.max(1, dmg - defender.flags.tempArmor);
+          defender.flags.tempArmor = 0;
+        }
+      }
+
+      defender.curHp = Math.max(0, defender.curHp - dmg);
+
+      var tag = (eff > 1) ? ' — super effective!' : (eff < 1 ? ' — not very effective...' : '');
+      logMsg(attacker.template.name + ' uses ' + (move.isEnhanced ? '★ ' : '') + move.name + ' for ' + dmg + ' damage' + tag);
+
+      ctx.dmg = dmg;
+      if (move.effect && EFFECT_REGISTRY.postDamage[move.effect]) EFFECT_REGISTRY.postDamage[move.effect](ctx);
+
+      if (move.aoe && dmg > 0) {
+        var aoeDmg = Math.round(dmg * 0.25);
+        if (aoeDmg > 0) {
+          state[otherSide].roster.filter(function (c) { return c !== defender && c.curHp > 0; }).forEach(function (bMon) {
+            bMon.curHp = Math.max(1, bMon.curHp - aoeDmg);
+            logMsg(attacker.template.name + "'s " + move.name + ' shockwave splashes ' + bMon.template.name + ' on the bench for ' + aoeDmg + ' damage!');
+            checkAndHandleFaint(bMon, otherSide);
+          });
+        }
+      }
+
+      if (attacker.template.passive === 'scorch' && isSpecial && defender.curHp > 0 && !move.effect) {
+        var isIfritEnh = isPassiveEnhanced(attacker, side);
+        if (Math.random() < (isIfritEnh ? 0.6 : 0.3)) {
+          applyBurn(defender, isIfritEnh ? 8 : 6, isIfritEnh ? 2 : 1);
+          logMsg(defender.template.name + ' is engulfed in ' + (isIfritEnh ? '★ Blazing Combustion!' : 'smoldering flames!'));
+        }
+      }
+      if (attacker.template.passive === 'lure' && !isSpecial && defender.curHp > 0 && !move.effect) {
+        var isNixieEnh = isPassiveEnhanced(attacker, side);
+        if (Math.random() < (isNixieEnh ? 0.75 : 0.5)) {
+          defender.flags.weakenNext = true;
+          if (isNixieEnh && defender.energy > 0) {
+            defender.energy = Math.max(0, defender.energy - 1);
+            logMsg(defender.template.name + ' is mesmerized by ★ Enchanting Melody (attack halved & -1 Energy)!');
+          } else {
+            logMsg(defender.template.name + ' is lured into a stupor!');
+          }
+        }
+      }
+      if (attacker.template.passive === 'trickster' && !isSpecial && defender.curHp > 0) {
+        var isSatyrEnh = isPassiveEnhanced(attacker, side);
+        if (Math.random() < (isSatyrEnh ? 0.60 : 0.35)) {
+          defender.flags.weakenNext = true;
+          if (isSatyrEnh) {
+            attacker.energy = Math.min(3, attacker.energy + 1);
+            logMsg(defender.template.name + ' is befuddled by ★ Mischief Master (+1 Energy to ' + attacker.template.name + ')!');
+          } else {
+            logMsg(defender.template.name + ' is befuddled!');
+          }
+        }
+      }
+      if (attacker.template.passive === 'petrify' && isSpecial && defender.curHp > 0 && !move.effect) {
+        var isBasiliskEnh = isPassiveEnhanced(attacker, side);
+        if (Math.random() < (isBasiliskEnh ? 0.55 : 0.35)) {
+          defender.flags.stunned = true;
+          if (isBasiliskEnh) {
+            applyBurn(defender, 4, 2);
+            logMsg(defender.template.name + ' is turned to stone by ★ Medusa Gaze and poisoned for 2 turns!');
+          } else {
+            logMsg(defender.template.name + ' begins to turn to stone!');
+          }
+        }
+      }
+    }
+
+    if (attacker.template.passive === 'charged') attacker.flags.chargeStacks = Math.min(3, (attacker.flags.chargeStacks || 0) + 1);
+    afterAction(side);
+  }
+
+  function afterAction(actingSide) {
+    var attacker = state[actingSide].active;
+    if (attacker && attacker.flags.dampenTurns > 0) {
+      attacker.flags.dampenTurns--;
+      if (attacker.flags.dampenTurns === 0) logMsg(attacker.template.name + ' is no longer dampened.');
+    }
+    if (actingSide === 'player' && state.atkBuffTurns > 0) {
+      state.atkBuffTurns--;
+      if (state.atkBuffTurns === 0) logMsg("Your party's Attack Boost has worn off.");
+    }
+    if (actingSide === 'ai' && state.shieldBuffTurns > 0) {
+      state.shieldBuffTurns--;
+      if (state.shieldBuffTurns === 0) logMsg("Your party's Shield Boost has worn off.");
+    }
+
+    checkAndHandleFaint(state.player.active, 'player');
+    checkAndHandleFaint(state.ai.active, 'ai');
+    if (fillEmptyActives()) { render(); return; }
+    if (state.pendingChoice) {
+      state.pendingEndTurnSide = actingSide;
+      render();
+      return;
+    }
+    render();
+    endTurn(actingSide);
+  }
+
+  function endTurn(justActedSide) {
+    state.busy = true;
+    var next = justActedSide === 'player' ? 'ai' : 'player';
+    setTimeout(function () { beginTurn(next); }, justActedSide === 'player' ? 650 : 1100);
+  }
+
+  function beginTurn(side) {
+    state.turn = side;
+    var inst = state[side].active;
+    if (!inst) { state.busy = true; render(); return; }
+
+    inst.energy = Math.min(3, inst.energy + 1);
+
+    if (inst.template.passive === 'regrowth') {
+      var isDryadEnh = isPassiveEnhanced(inst, side);
+      var heal = Math.min(isDryadEnh ? 11 : 6, inst.template.maxHp - inst.curHp);
+      if (heal > 0) {
+        inst.curHp += heal;
+        logMsg(inst.template.name + ' regrows ' + heal + ' HP.' + (isDryadEnh ? ' (★ Verdant Flourish)' : ''));
+      }
+    }
+
+    if (inst.template.passive === 'radiationAura') {
+      var activeFoe = state[side === 'player' ? 'ai' : 'player'].active;
+      if (activeFoe && activeFoe.curHp > 0) {
+        activeFoe.curHp = Math.max(1, activeFoe.curHp - 5);
+        logMsg('☢️ Godzilla’s Ancient Radiation sears ' + activeFoe.template.name + ' for 5 damage!');
+      }
+    } else if (inst.template.passive === 'radiation') {
+      var isGodzillaEnh = isPassiveEnhanced(inst, side);
+      var radDmg = isGodzillaEnh ? 7 : 4;
+      var activeFoe2 = state[side === 'player' ? 'ai' : 'player'].active;
+      if (activeFoe2 && activeFoe2.curHp > 0) {
+        activeFoe2.curHp = Math.max(1, activeFoe2.curHp - radDmg);
+        logMsg('☢️ Godzilla’s radioactive haze burns ' + activeFoe2.template.name + ' for ' + radDmg + ' damage!' + (isGodzillaEnh ? ' (★ Nuclear Pulse)' : ''));
+      }
+    }
+
+    if (inst.flags.burnTurns > 0 && inst.flags.burnDmg > 0) {
+      var bdmg = inst.flags.burnDmg;
+      inst.flags.burnTurns--;
+      if (inst.flags.burnTurns <= 0) inst.flags.burnDmg = 0;
+      inst.curHp = Math.max(1, inst.curHp - bdmg);
+      logMsg(inst.template.name + ' suffers ' + bdmg + ' lingering burn/poison damage! (' + (inst.flags.burnTurns === 1 ? '1 turn remaining' : inst.flags.burnTurns + ' turns remaining') + ')');
+    }
+
+    checkAndHandleFaint(state.player.active, 'player');
+    checkAndHandleFaint(state.ai.active, 'ai');
+    if (fillEmptyActives()) { state.busy = true; render(); return; }
+    if (state.pendingChoice) {
+      state.pendingEndTurnSide = side;
+      state.busy = true;
+      render();
+      return;
+    }
+
+    if (state[side].active !== inst) {
+      state.busy = true;
+      render();
+      endTurn(side);
+      return;
+    }
+
+    if (inst.flags.stunned) {
+      inst.flags.stunned = false;
+      logMsg(inst.template.name + ' is incapacitated and cannot act!');
+      state.busy = true;
+      render();
+      endTurn(side);
+      return;
+    }
+
+    if (side === 'ai') {
+      state.busy = true;
+      render();
+      setTimeout(aiAct, 750);
+    } else {
+      state.busy = false;
+      render();
+    }
+  }
+
+  function aiAct() {
+    var attacker = state.ai.active, defender = state.player.active;
+    if (!attacker || !defender) return;
+    resolveAttack('ai', attacker.energy >= attacker.template.special.cost ? 'special' : 'basic');
+  }
+
+  function playerAttack(moveKey) {
+    if (state.busy || state.turn !== 'player' || state.pendingChoice) return;
+    var attacker = state.player.active;
+    if (!attacker || attacker.curHp <= 0) return;
+    var move = getCreatureMove(attacker.template.id, moveKey);
+    if (moveKey === 'special' && attacker.energy < move.cost) return;
+    state.busy = true;
+    resolveAttack('player', moveKey);
+  }
+
+  /* TASK 44: Potion use enforcement and 5-potion limit check in boss fights */
+  function usePotion() {
+    if (state.busy || state.turn !== 'player' || state.pendingChoice) return;
+    if (state.isBossFight && (state.potionsUsedThisBattle || 0) >= 5) return;
+    var inst = state.player.active;
+    if (!inst || inst.curHp <= 0 || state.potions <= 0) return;
+    state.potions--;
+    if (state.isBossFight) state.potionsUsedThisBattle = (state.potionsUsedThisBattle || 0) + 1;
+    saveGameData();
+    var oldHp = inst.curHp;
+    inst.curHp = inst.template.maxHp;
+    logMsg("You used a Health Potion! " + inst.template.name + " recovered " + (inst.curHp - oldHp) + " HP.");
+    render();
+  }
+
+  function useAtkPotion() {
+    if (state.busy || state.turn !== 'player' || state.pendingChoice) return;
+    if (state.isBossFight && (state.potionsUsedThisBattle || 0) >= 5) return;
+    var inst = state.player.active;
+    if (!inst || inst.curHp <= 0 || state.atkPotions <= 0) return;
+    state.atkPotions--;
+    state.atkBuffTurns = 3;
+    if (state.isBossFight) state.potionsUsedThisBattle = (state.potionsUsedThisBattle || 0) + 1;
+    saveGameData();
+    logMsg("You used an Atk Boost Potion! All party members gain +20% Attack damage for 3 turns!");
+    render();
+  }
+
+  function useShieldPotion() {
+    if (state.busy || state.turn !== 'player' || state.pendingChoice) return;
+    if (state.isBossFight && (state.potionsUsedThisBattle || 0) >= 5) return;
+    var inst = state.player.active;
+    if (!inst || inst.curHp <= 0 || state.shieldPotions <= 0) return;
+    state.shieldPotions--;
+    state.shieldBuffTurns = 3;
+    if (state.isBossFight) state.potionsUsedThisBattle = (state.potionsUsedThisBattle || 0) + 1;
+    saveGameData();
+    logMsg("You used a Shield Potion! All allies gain +35% incoming Damage Reduction for 3 enemy turns!");
+    render();
+  }
+
+  function useEnergyPotion() {
+    if (state.busy || state.turn !== 'player' || state.pendingChoice) return;
+    if (state.isBossFight && (state.potionsUsedThisBattle || 0) >= 5) return;
+    var inst = state.player.active;
+    if (!inst || inst.curHp <= 0 || state.energyPotions <= 0 || inst.energy >= 3) return;
+    state.energyPotions--;
+    inst.energy = 3;
+    if (state.isBossFight) state.potionsUsedThisBattle = (state.potionsUsedThisBattle || 0) + 1;
+    saveGameData();
+    logMsg("You used an Energy Potion! " + inst.template.name + "'s Energy was fully charged to 3 ◆.");
+    render();
+  }
+
+  function performSummon() {
+    if (state.playerLevel < 5) return;
+    var isAbilities = (state.altarTab === 'abilities');
+    var maxCount = isAbilities ? Object.keys(ABILITY_ENHANCEMENTS).length : Object.keys(ENHANCED_MOVES).length;
+    var currentCount = isAbilities ? Object.keys(state.unlockedAbilities || {}).length : Object.keys(state.unlockedEnhanced || {}).length;
+
+    if (currentCount >= maxCount) return;
+
+    var step = isAbilities ? (state.abilitySummonStep || 1) : (state.summonStep || 1);
+    var cost = (step === 4) ? 0 : 5;
+    if (state.gems < cost && step !== 4) return;
+
+    state.gems -= cost;
+
+    if (isAbilities) {
+      state.abilitySummonStep = (step % 4) + 1;
+      var allKeys = Object.keys(ABILITY_ENHANCEMENTS);
+      var unowned = allKeys.filter(function(k) { return !state.unlockedAbilities[k]; });
+      var drawnKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+      var isDuplicate = !!state.unlockedAbilities[drawnKey], pityTriggered = false, finalKey = drawnKey;
+
+      if (isDuplicate) {
+        state.abilityDupeStreak = (state.abilityDupeStreak || 0) + 1;
+        if (state.abilityDupeStreak >= 3 && unowned.length > 0) {
+          finalKey = unowned[Math.floor(Math.random() * unowned.length)];
+          state.unlockedAbilities[finalKey] = true;
+          pityTriggered = true;
+          isDuplicate = false;
+          state.abilityDupeStreak = 0;
+        }
+      } else {
+        state.unlockedAbilities[finalKey] = true;
+      }
+
+      saveGameData();
+      var enhData = ABILITY_ENHANCEMENTS[finalKey];
+      var beast = (enhData.charId === 'godzilla' ? PLAYABLE_GODZILLA : CREATURES.find(function(c) { return c.id === enhData.charId; }));
+
+      state.recentSummon = {
+        masteryBonus: false, isAbility: true, isDuplicate: isDuplicate, pityTriggered: pityTriggered,
+        dupeStreak: state.abilityDupeStreak, key: finalKey, beast: beast, name: enhData.name, effectDesc: enhData.desc
+      };
+      render();
+    } else {
+      state.summonStep = (step % 4) + 1;
+      var allKeys2 = Object.keys(ENHANCED_MOVES);
+      var unowned2 = allKeys2.filter(function(k) { return !state.unlockedEnhanced[k]; });
+      var drawnKey2 = allKeys2[Math.floor(Math.random() * allKeys2.length)];
+      var isDuplicate2 = !!state.unlockedEnhanced[drawnKey2], pityTriggered2 = false, finalKey2 = drawnKey2;
+
+      if (isDuplicate2) {
+        state.dupeStreak = (state.dupeStreak || 0) + 1;
+        if (state.dupeStreak >= 3 && unowned2.length > 0) {
+          finalKey2 = unowned2[Math.floor(Math.random() * unowned2.length)];
+          state.unlockedEnhanced[finalKey2] = true;
+          pityTriggered2 = true;
+          isDuplicate2 = false;
+          state.dupeStreak = 0;
+        }
+      } else {
+        state.unlockedEnhanced[finalKey2] = true;
+      }
+
+      saveGameData();
+      var enhData2 = ENHANCED_MOVES[finalKey2];
+      var beast2 = (enhData2.charId === 'godzilla' ? PLAYABLE_GODZILLA : CREATURES.find(function(c) { return c.id === enhData2.charId; }));
+
+      state.recentSummon = {
+        masteryBonus: false, isAbility: false, isDuplicate: isDuplicate2, pityTriggered: pityTriggered2,
+        dupeStreak: state.dupeStreak, key: finalKey2, beast: beast2, moveKey: enhData2.moveKey,
+        name: beast2[enhData2.moveKey].name, dmg: enhData2.dmg, cost: enhData2.cost, effectDesc: enhData2.effectDesc
+      };
+      render();
+    }
+  }
+
+  function resetProgress() {
+    try { localStorage.removeItem('codex_save'); } catch(e) { state.storageError = true; }
+    ensureCreatureRosterSync(false);
+    state = freshState();
+    render();
+  }
+
+  function toggleSelect(id) {
+    var idx = state.selectedIds.indexOf(id);
+    if (idx >= 0) state.selectedIds.splice(idx, 1);
+    else if (state.selectedIds.length < 5) state.selectedIds.push(id);
+    render();
+  }
+
+  function startBattle() {
+    if (state.selectedIds.length !== 5) return;
+    var chosen = CREATURES.filter(function (c) { return state.selectedIds.indexOf(c.id) >= 0; });
+    state.player.roster = chosen.map(makeInstance);
+
+    /* TASK 44: Reset per-battle potion usage */
+    state.potionsUsedThisBattle = 0;
+
+    if (state.isBossFight) {
+      state.ai.roster = [makeInstance(BOSSES[0])];
+      state.ai.active = state.ai.roster[0];
+    } else {
+      var remaining = shuffle(CREATURES.filter(function (c) { return state.selectedIds.indexOf(c.id) === -1; }));
+      state.ai.roster = remaining.slice(0, 5).map(function (t) {
+        var inst = makeInstance(t);
+        if (state.difficulty === 'hard') {
+          inst.aiEnhancedMoves = {
+            basic: Math.random() < 0.5,
+            special: Math.random() < 0.5
+          };
+          inst.aiEnhancedAbility = Math.random() < 0.5;
+        }
+        return inst;
+      });
+      state.ai.active = aiPickBest(state.ai.roster, null);
+    }
+
+    state.player.active = null;
+    state.log = []; state.winner = null; state.endMessage = null; state.earnedGold = 0; state.earnedGems = 0; state.earnedXp = 0;
+    state.atkBuffTurns = 0; state.shieldBuffTurns = 0; state.showForfeit = false; state.showItemsModal = false; state.busy = false; state.turn = 'player';
+    state.pendingChoice = 'initial-player'; state.screen = 'battle';
+    
+    if (state.isBossFight) {
+      logMsg('⚠️ WARNING: GODZILLA RISES FROM THE SEAS WITH 500 HP! ⚠️');
+      logMsg('⚔️ Titan Rule: Maximum 5 Potions total may be used during this battle!');
+    } else {
+      logMsg('The Mysterious Being takes the field with ' + state.ai.active.template.name + (state.difficulty === 'hard' ? ' [HARD MODE]' : '') + '!');
+    }
+    render();
+  }
+
+  function pickInitial(id) {
+    if (state.pendingChoice !== 'initial-player') return;
+    var inst = state.player.roster.find(function(c) { return c.template.id === id; });
+    if (!inst) return;
+    state.player.active = inst;
+    state.pendingChoice = null;
+    logMsg('You send out ' + inst.template.name + ' to lead the battle!');
+    state.busy = true;
+    render();
+    setTimeout(function () { beginTurn('player'); }, 500);
+  }
+
+  function pickReplacement(id) {
+    if (state.pendingChoice !== 'replace-player') return;
+    var inst = state.player.roster.find(function(c) { return c.template.id === id && c.curHp > 0; });
+    if (!inst) return;
+    state.player.active = inst;
+    state.pendingChoice = null;
+    logMsg('You send out ' + inst.template.name + '!');
+    var side = state.pendingEndTurnSide || 'ai';
+    state.pendingEndTurnSide = null;
+    state.busy = true;
+    render();
+    endTurn(side);
+  }
+
+  function restoreNonVolatile(targetScreen) {
+    var saved = loadSaveData();
+    var curQuests = state.quests, curHardQuests = state.hardModeQuests, curDate = state.lastQuestDate;
+    state = freshState();
+    Object.assign(state, saved, { quests: curQuests, hardModeQuests: curHardQuests, lastQuestDate: curDate, screen: targetScreen, isBossFight: false });
+    render();
+  }
+
+  function playAgain() { restoreNonVolatile('difficulty'); }
+  function goToTitle() { restoreNonVolatile('title'); }
+
+  function typeSeal(type, size) {
+    var sz = size || 40;
+    return '<span class="type-seal type-seal--' + type + '" style="--seal-size:' + sz + 'px" title="' + (TYPE_META[type] ? TYPE_META[type].label : type) + '">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' + (TYPE_ICONS[type] || '') + '</svg></span>';
+  }
+
+  function creatureModelHTML(t) {
+    return '<div class="creature-model"><svg viewBox="0 0 100 100" aria-hidden="true">' + t.model + '</svg></div>';
+  }
+
+  function movesMarkup(t) {
+    var bMove = getCreatureMove(t.id, 'basic'), sMove = getCreatureMove(t.id, 'special'), passiveObj = getCreaturePassive(t.id);
+    var aoeTag = sMove.aoe ? '<span class="aoe-badge-tag">AOE</span>' : '';
+    return '<span class="creature-moves">' +
+      '<span class="move-row' + (bMove.isEnhanced ? ' enhanced' : '') + '"><span class="move-name">' + bMove.name + (bMove.isEnhanced ? '<span class="enhanced-badge-tag">★ Enhanced</span>' : '') + '</span><span class="move-dmg">' + bMove.dmg + '</span></span>' +
+      '<span class="move-row' + (sMove.isEnhanced ? ' enhanced' : '') + '"><span class="move-name">' + sMove.name + aoeTag + (sMove.isEnhanced ? '<span class="enhanced-badge-tag">★ Enhanced</span>' : '') + '</span><span class="move-dmg">' + sMove.dmg + '<span class="move-cost">' + sMove.cost + '&#9670;</span></span></span>' +
+      '</span>' +
+      '<span class="creature-passive' + (passiveObj.isEnhanced ? ' enhanced-passive' : '') + '">' +
+        (passiveObj.isEnhanced ? '<strong style="color:var(--gilt-bright);">★ ' + passiveObj.name + ': </strong>' : '<em>Passive: </em>') + passiveObj.desc +
+      '</span>';
+  }
+
+  function creatureCardHTML(t, selected, atLimit) {
+    return '<button type="button" class="creature-card type-' + t.type + (selected ? ' selected' : '') + '" data-action="toggle-select" data-id="' + t.id + '"' + ((atLimit && !selected) ? ' disabled' : '') + '>' +
+      typeSeal(t.type) +
+      (selected ? '<span class="selected-badge" aria-hidden="true">&#10003;</span>' : '') +
+      creatureModelHTML(t) +
+      '<span class="creature-name">' + t.name + '</span>' +
+      '<span class="creature-type-label">' + TYPE_META[t.type].label + '</span>' +
+      '<span class="creature-hp">HP ' + t.maxHp + '</span>' +
+      movesMarkup(t) +
+      '</button>';
+  }
+
+  function pickCardHTML(inst) {
+    var t = inst.template;
+    return '<button type="button" class="creature-card type-' + t.type + '" data-action="pick-creature" data-id="' + t.id + '">' +
+      typeSeal(t.type) + creatureModelHTML(t) +
+      '<span class="creature-name">' + t.name + '</span>' +
+      '<span class="creature-type-label">' + TYPE_META[t.type].label + '</span>' +
+      '<span class="creature-hp">HP ' + inst.curHp + ' / ' + t.maxHp + '</span>' +
+      movesMarkup(t) +
+      '</button>';
+  }
+
+  function partyTokenHTML(inst, isActive) {
+    var fainted = inst.curHp <= 0, type = inst.template.type;
+    return '<span class="party-token type-seal type-seal--' + type + (isActive ? ' active' : '') + (fainted ? ' fainted' : '') + '" style="--seal-size: 36px" title="' + inst.template.name + ' (' + (TYPE_META[type] ? TYPE_META[type].label : type) + ')' + (fainted ? ' - Fainted' : '') + '">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' + (TYPE_ICONS[type] || '') + '</svg>' +
+      (fainted ? '<span class="fainted-overlay" aria-hidden="true">&#10007;</span>' : '') +
+    '</span>';
+  }
+
+  function monPanelHTML(inst) {
+    if (!inst) return '<div class="mon-panel empty"><span>Awaiting Champion Selection...</span></div>';
+    var t = inst.template;
+    var hpPct = Math.max(0, Math.round((inst.curHp / t.maxHp) * 100));
+    var pips = [0, 1, 2].map(function (i) { return '<span class="pip' + (i < inst.energy ? ' filled' : '') + '"></span>'; }).join('');
+    var isBoss = t.id === 'godzilla_boss';
+
+    return '<div class="mon-panel type-' + t.type + (isBoss ? ' boss-panel' : '') + '">' +
+      typeSeal(t.type, 40) + creatureModelHTML(t) +
+      '<h2 class="mon-name">' + t.name + (isBoss ? ' [BOSS]' : '') + '</h2>' +
+      '<div class="hp-row"><div class="hp-bar-track"><div class="hp-bar-fill" style="width:' + hpPct + '%"></div></div><span class="hp-text">' + inst.curHp + '/' + t.maxHp + '</span></div>' +
+      '<div class="energy-pips">' + pips + '</div>' +
+      '</div>';
+  }
+
+  function actionButtonsHTML() {
+    var inst = state.player.active, aiInst = state.ai.active;
+    if (!inst) return '';
+    var canAct = !state.busy && state.turn === 'player' && !state.pendingChoice && inst.curHp > 0;
+    var basic = getCreatureMove(inst.template.id, 'basic'), special = getCreatureMove(inst.template.id, 'special');
+    var specialReady = inst.energy >= special.cost, effHtml = '';
+    
+    if (aiInst) {
+      var eff = (EFFECTIVENESS[inst.template.type] && EFFECTIVENESS[inst.template.type][aiInst.template.type]) || 1;
+      if (eff > 1) effHtml = '<div class="eff-arrow eff-up" title="Super Effective!"></div>';
+      else if (eff < 1) effHtml = '<div class="eff-arrow eff-down" title="Not Very Effective..."></div>';
+    }
+
+    var aoeTag = special.aoe ? ' <span class="aoe-badge-tag">💥 AOE</span>' : '';
+    var totalItems = (state.potions || 0) + (state.atkPotions || 0) + (state.shieldPotions || 0) + (state.energyPotions || 0);
+    var activeBuffs = [];
+    if (state.atkBuffTurns > 0) activeBuffs.push('⚔️' + state.atkBuffTurns + 't');
+    if (state.shieldBuffTurns > 0) activeBuffs.push('🛡️' + state.shieldBuffTurns + 't');
+    var buffsTag = activeBuffs.length > 0 ? ' [' + activeBuffs.join(' ') + ']' : '';
+    var bossItemCounter = state.isBossFight ? ' (' + (state.potionsUsedThisBattle || 0) + '/5 Used)' : '';
+
+    return '<button type="button" class="move-btn' + (basic.isEnhanced ? ' enhanced-move' : '') + '" data-action="attack" data-move="basic"' + (canAct ? '' : ' disabled') + '>' +
+      '<span><span class="move-btn-name">' + basic.name + '</span><br><span class="move-btn-dmg">' + basic.dmg + ' dmg' + (basic.effectDesc ? ' &middot; ' + basic.effectDesc : ' &middot; always ready') + '</span></span>' + effHtml + '</button>' +
+      '<button type="button" class="move-btn special' + (special.isEnhanced ? ' enhanced-move' : '') + '" data-action="attack" data-move="special"' + ((canAct && specialReady) ? '' : ' disabled') + '>' +
+      '<span><span class="move-btn-name">' + special.name + aoeTag + '</span><br><span class="move-btn-dmg">' + special.dmg + ' dmg' + (special.aoe ? ' (Cleaves Bench)' : '') + (special.effectDesc ? ' &middot; ' + special.effectDesc : '') + '</span>' +
+      (specialReady ? '' : '<br><span class="move-btn-cost">Needs ' + special.cost + '&#9670; — have ' + inst.energy + '&#9670;</span>') + '</span>' + effHtml + '</button>' +
+      '<button type="button" class="move-btn open-items-btn" data-action="open-items"' + (canAct ? '' : ' disabled') + '>' +
+      '<span><span class="move-btn-name">🎒 Items &amp; Potions' + buffsTag + bossItemCounter + '</span><br><span class="move-btn-dmg">Free Actions &middot; ' + totalItems + ' Available</span></span></button>';
+  }
+
+  function typeGuideHTML() {
+    var rows = Object.keys(TYPE_META).map(function (type) {
+      var rel = typeRelations(type);
+      return '<div class="type-guide-row type-' + type + '">' +
+        typeSeal(type, 34) +
+        '<span class="type-guide-name">' + TYPE_META[type].label + '</span>' +
+        '<span class="type-guide-rel"><strong>Strong vs</strong> ' + (rel.beats.map(function (t) { return TYPE_META[t].label; }).join(' &amp; ') || 'None (Neutral)') + '</span>' +
+        '<span class="type-guide-rel weak"><strong>Weak vs</strong> ' + (rel.weakTo.map(function (t) { return TYPE_META[t].label; }).join(' &amp; ') || 'None (Neutral)') + '</span>' +
+        '</div>';
+    }).join('');
+    return '<div class="type-guide">' + rows + '</div>';
+  }
+
+  function typeRelations(type) {
+    var beats = [], weakTo = [];
+    Object.keys(TYPE_META).forEach(function (other) {
+      if (other === type) return;
+      if (EFFECTIVENESS[type] && EFFECTIVENESS[type][other] > 1) beats.push(other);
+      if (EFFECTIVENESS[other] && EFFECTIVENESS[other][type] > 1) weakTo.push(other);
+    });
+    return { beats: beats, weakTo: weakTo };
+  }
+
+  function renderGuideModal() {
+    if (!state.showGuide) return '';
+    return '<div class="modal-overlay" data-action="toggle-guide"><div class="modal-box"><h2>Elemental Guide</h2>' + typeGuideHTML() + '<button type="button" class="primary-btn guide-close-btn" data-action="toggle-guide">Close</button></div></div>';
+  }
+
+  function renderForfeitModal() {
+    if (!state.showForfeit) return '';
+    return '<div class="modal-overlay" data-action="close-forfeit"><div class="modal-box forfeit-modal-box"><h2>Surrender Battle?</h2><p class="forfeit-msg">Are you sure? You will forfeit the contest and earn no victory spoils.</p><div class="modal-buttons"><button type="button" class="primary-btn" data-action="forfeit-back">Return to Fight</button><button type="button" class="primary-btn forfeit-confirm-btn" data-action="forfeit-continue">Surrender</button></div></div></div>';
+  }
+
+  function renderResetModal() {
+    if (!state.showResetModal) return '';
+    return '<div class="modal-overlay" data-action="close-reset-modal"><div class="modal-box reset-modal-box"><h2>Reset Codex Archives?</h2><p class="reset-msg">This will permanently erase all player level, XP, saved Gold, Gems, Potions, Quests, Achievements, and Awakened Techniques. This cannot be undone.</p><div class="modal-buttons"><button type="button" class="primary-btn" data-action="reset-back">Cancel</button><button type="button" class="primary-btn reset-confirm-btn" data-action="reset-continue">Erase All Data</button></div></div></div>';
+  }
+
+  function renderNameModal() {
+    if (!state.showNameModal) return '';
+    return '<div class="modal-overlay" data-action="close-name-modal"><div class="modal-box name-modal-box">' +
+      '<h2>Edit Champion Name</h2>' +
+      '<p class="name-modal-msg">Enter your title or name to be inscribed upon the realm’s heraldry (max 20 characters):</p>' +
+      '<input type="text" id="player-name-input" class="name-input-field" maxlength="20" value="' + (state.playerName || 'Champion') + '" onkeydown="if(event.key===\'Enter\'){event.preventDefault();document.querySelector(\'[data-action=save-player-name]\')?.click();}" autofocus>' +
+      '<div class="modal-buttons">' +
+        '<button type="button" class="primary-btn" data-action="close-name-modal">Cancel</button>' +
+        '<button type="button" class="primary-btn" data-action="save-player-name">Save Name</button>' +
+      '</div>' +
+    '</div></div>';
+  }
+
+  /* TASK 44: Items modal shows boss potion limit (max 5) and disables buttons once cap is reached */
+  function renderItemsModal() {
+    if (!state.showItemsModal) return '';
+    var inst = state.player.active;
+    var canAct = !state.busy && state.turn === 'player' && !state.pendingChoice && inst && inst.curHp > 0;
+    var bossCapReached = state.isBossFight && ((state.potionsUsedThisBattle || 0) >= 5);
+
+    var canUseHealth = canAct && !bossCapReached && (state.potions > 0) && (inst.curHp < inst.template.maxHp);
+    var canUseAtk = canAct && !bossCapReached && (state.atkPotions > 0);
+    var canUseShield = canAct && !bossCapReached && (state.shieldPotions > 0);
+    var canUseEnergy = canAct && !bossCapReached && (state.energyPotions > 0) && (inst.energy < 3);
+
+    return '<div class="modal-overlay" data-action="close-items"><div class="modal-box items-modal-box">' +
+      '<h2>🎒 Battle Inventory</h2>' +
+      '<p style="margin:0 0 0.5rem; color:var(--parchment-muted); font-size:0.95rem;">Using items does not consume your turn (Free Action).</p>' +
+      (state.isBossFight 
+        ? '<div style="margin-bottom:0.8rem; font-family:var(--font-display); font-size:0.88rem; font-weight:700; color:' + (bossCapReached ? 'var(--wax-red-bright)' : 'var(--gilt-bright)') + ';">' +
+            'Titan Battle Potion Limit: ' + (state.potionsUsedThisBattle || 0) + ' / 5 Used' +
+          '</div>' 
+        : '') +
+      (bossCapReached ? '<div class="locked-reason-banner">⚠️ Titan Potion Limit Reached (5/5 used). No more potions may be used in this battle!</div>' : '') +
+      '<div class="items-list-grid">' +
+        '<div class="item-modal-row">' +
+          '<div class="item-modal-info">' +
+            '<div class="item-modal-title"><span>❤️ Health Potion</span></div>' +
+            '<div class="item-modal-desc">Restores active creature to maximum HP (' + (inst ? inst.curHp + '/' + inst.template.maxHp + ' HP' : '') + ').</div>' +
+            '<div class="item-modal-owned">Owned: ' + (state.potions || 0) + '</div>' +
+          '</div>' +
+          '<button type="button" class="item-modal-use-btn" data-action="use-potion"' + (canUseHealth ? '' : ' disabled') + '>Use</button>' +
+        '</div>' +
+
+        '<div class="item-modal-row">' +
+          '<div class="item-modal-info">' +
+            '<div class="item-modal-title"><span>⚔️ Atk Boost Potion</span>' + (state.atkBuffTurns > 0 ? '<span style="color:var(--gilt-bright); font-size:0.8rem;">(' + state.atkBuffTurns + 't active)</span>' : '') + '</div>' +
+            '<div class="item-modal-desc">Empowers all party attacks with +20% damage for 3 turns.</div>' +
+            '<div class="item-modal-owned">Owned: ' + (state.atkPotions || 0) + '</div>' +
+          '</div>' +
+          '<button type="button" class="item-modal-use-btn" data-action="use-atk-potion"' + (canUseAtk ? '' : ' disabled') + '>Use</button>' +
+        '</div>' +
+
+        '<div class="item-modal-row">' +
+          '<div class="item-modal-info">' +
+            '<div class="item-modal-title"><span>🛡️ Shield Potion</span>' + (state.shieldBuffTurns > 0 ? '<span style="color:#2dd4bf; font-size:0.8rem;">(' + state.shieldBuffTurns + 't active)</span>' : '') + '</div>' +
+            '<div class="item-modal-desc">Wards all allies with 35% damage mitigation for 3 turns.</div>' +
+            '<div class="item-modal-owned">Owned: ' + (state.shieldPotions || 0) + '</div>' +
+          '</div>' +
+          '<button type="button" class="item-modal-use-btn" data-action="use-shield-potion"' + (canUseShield ? '' : ' disabled') + '>Use</button>' +
+        '</div>' +
+
+        '<div class="item-modal-row">' +
+          '<div class="item-modal-info">' +
+            '<div class="item-modal-title"><span>⚡ Energy Potion</span></div>' +
+            '<div class="item-modal-desc">Instantly charges active creature\'s Energy to 3 ◆ (' + (inst ? inst.energy : 0) + '/3 ◆).</div>' +
+            '<div class="item-modal-owned">Owned: ' + (state.energyPotions || 0) + '</div>' +
+          '</div>' +
+          '<button type="button" class="item-modal-use-btn" data-action="use-energy-potion"' + (canUseEnergy ? '' : ' disabled') + '>Use</button>' +
+        '</div>' +
+      '</div>' +
+      '<button type="button" class="primary-btn" data-action="close-items">Done</button>' +
+    '</div></div>';
+  }
+
+  function renderLevelUpModal() {
+    if (!state.levelUpModalData) return '';
+    var d = state.levelUpModalData;
+    var tierClass = getLevelTierClass(d.newLevel);
+
+    return '<div class="modal-overlay" data-action="close-levelup-modal"><div class="modal-box levelup-modal-box">' +
+      '<h2 style="color:#c084fc; margin-bottom:0.3rem;">🎉 LEVEL UP! 🎉</h2>' +
+      '<p style="margin:0; font-size:1.1rem; color:var(--parchment-muted);">Your mastery over the codex deepens!</p>' +
+      '<div class="levelup-badge-big"><span class="level-badge ' + tierClass + '" style="font-size:1.8rem; padding:0.4rem 1.4rem;">Level ' + d.newLevel + '</span></div>' +
+      (d.unlockedLvl5Features ? '<div class="levelup-unlock-note">✨ <strong>New Features Unlocked!</strong><br>• <strong>Summon Altar:</strong> Awaken technique and ability enhancements.<br>• <strong>Item Shop:</strong> Purchase battle potions with gold.<br>• <strong>Daily Decrees:</strong> Complete daily quests for rewards.</div>' : '') +
+      (d.unlockedHard ? '<div class="levelup-unlock-note" style="border-color:var(--wax-red-bright); background:rgba(69,10,10,0.85); color:#fecaca;">💀 <strong>Hard Mode &amp; Hard Decrees Unlocked!</strong><br>Challenge empowered enemies and complete Hard Mode quests for massive victory spoils!</div>' : '') +
+      '<p style="font-size:0.95rem; color:var(--parchment-muted); margin-top:0.8rem;">Keep battling to unlock greater trials and power!</p>' +
+      '<button type="button" class="primary-btn" data-action="close-levelup-modal" style="margin-top:0.6rem;">Glorious!</button>' +
+    '</div></div>';
+  }
+
+  function renderBossUnlockModal() {
+    if (!state.bossUnlockModal) return '';
+    return '<div class="modal-overlay" data-action="close-boss-unlock"><div class="modal-box boss-unlock-modal-box">' +
+      '<h2 style="color:#c084fc; margin-bottom:0.4rem;">👑 TITAN CONQUERED! 👑</h2>' +
+      '<p style="font-size:1.15rem; color:#f3e8ff; margin:0 0 1rem; font-weight:700;">Godzilla joins your roster as a playable champion!</p>' +
+      '<div class="summon-card-preview type-dark" style="margin:0 auto 1.2rem;">' +
+        typeSeal('dark', 44) + creatureModelHTML(PLAYABLE_GODZILLA) +
+        '<h3 style="font-family:var(--font-display); margin:0.3rem 0; font-size:1.4rem; color:#fff;">Godzilla</h3>' +
+        '<div style="font-size:0.9rem; color:#a78bfa; font-weight:bold;">Element: Dark (Neutral) &bull; HP: 100</div>' +
+        '<p class="summon-effect-desc">"Atomic Claw (14 dmg) &bull; Atomic Breath (26 dmg AOE) &bull; Passive: Carapace (-4 incoming dmg &amp; 4 rad dmg/turn)"</p>' +
+      '</div>' +
+      '<p style="font-size:0.92rem; color:var(--parchment-muted); margin-bottom:1.2rem;">You may now recruit Godzilla into any standard battle party!</p>' +
+      '<button type="button" class="primary-btn" data-action="close-boss-unlock">Claim Godzilla</button>' +
+    '</div></div>';
+  }
+
+  function renderSummonModal() {
+    if (!state.recentSummon) return '';
+    var s = state.recentSummon;
+
+    var titleClass = s.pityTriggered ? ' is-pity' : (s.isDuplicate ? ' is-duplicate' : '');
+    var headerText = s.pityTriggered 
+      ? (s.isAbility ? '★ PITY TRIGGERED! Guaranteed New Ability! ★' : '★ PITY TRIGGERED! Guaranteed New Technique! ★')
+      : (s.isDuplicate ? (s.isAbility ? 'Duplicate Ability Drawn' : 'Duplicate Technique Drawn') : (s.isAbility ? '★ Passive Ability Awakened! ★' : '★ Technique Awakened! ★'));
+
+    return '<div class="modal-overlay" data-action="close-summon-modal"><div class="modal-box summon-reveal-box' + titleClass + '"><h2 class="summon-title' + titleClass + '">' + headerText + '</h2>' +
+      '<p style="margin:0 0 0.5rem; color:var(--parchment-muted); font-size:1.05rem;">' + (s.pityTriggered ? '3 duplicate pulls reached! The altar guarantees an unowned awakening:' : (s.isDuplicate ? 'You drew an already awakened technique:' : 'A permanent enhancement has bonded with your champion!')) + '</p>' +
+      '<div class="summon-card-preview type-' + s.beast.type + (s.isDuplicate ? ' is-duplicate' : '') + '">' +
+        typeSeal(s.beast.type, 38) + creatureModelHTML(s.beast) +
+        '<h3 style="font-family:var(--font-display); margin:0.3rem 0; font-size:1.25rem; color:#fff;">' + s.beast.name + '</h3>' +
+        '<div style="font-family:var(--font-display); font-weight:bold; color:var(--gilt-bright); font-size:1.05rem;">' + s.name + '</div>' +
+        (s.isAbility ? '<div style="font-size:0.85rem; color:#fde047; font-weight:bold; margin-top:0.2rem;">Awakened Passive Ability</div>' : '<div style="font-size:0.85rem; color:#f87171; font-weight:bold; margin-top:0.2rem;">Damage: ' + s.dmg + (s.cost ? ' (Cost: ' + s.cost + '◆)' : '') + '</div>') +
+        '<p class="summon-effect-desc">"' + s.effectDesc + '"</p>' +
+      '</div>' +
+      (s.isDuplicate ? '<div class="dupe-status-banner">Duplicate Pity: <strong>' + s.dupeStreak + ' / 3</strong></div>' : (s.pityTriggered ? '<div class="dupe-status-banner" style="color:#38bdf8; border-color:#0284c7;">Pity Counter Reset to 0</div>' : '')) +
+      '<button type="button" class="primary-btn" style="margin-top:0.8rem;" data-action="close-summon-modal">Continue</button>' +
+      '</div></div>';
+  }
+
+  function renderQuestCardsList(questList, isLocked, lockMessage) {
+    if (!questList || !questList.length) return '';
+    return questList.map(function (q) {
+      var pct = isLocked ? 0 : Math.min(100, Math.round((q.progress / q.target) * 100));
+      return '<div class="quest-card' + (isLocked ? ' locked-quest-card' : '') + (q.completed ? ' completed' : '') + (q.claimed ? ' claimed' : '') + (q.isHard ? ' hard-quest-card' : '') + '">' +
+        '<div class="quest-card-top"><span class="quest-tier-badge quest-tier--' + q.tier.toLowerCase() + '">' + q.tier + '</span><div class="quest-rewards"><span class="quest-reward-gold">+' + q.goldReward + 'g</span><span class="quest-reward-gems">+' + q.gemReward + '💎</span></div></div>' +
+        '<p class="quest-desc">' + q.desc + '</p>' +
+        '<div><div class="quest-progress-track"><div class="quest-progress-fill" style="width:' + pct + '%"></div></div><div class="quest-progress-label"><span>Progress</span><span>' + (isLocked ? '0 / ' + q.target : q.progress + ' / ' + q.target) + '</span></div></div>' +
+        '<div style="display:flex; justify-content:flex-end; align-items:center; min-height:28px;">' +
+          (isLocked 
+            ? '<span style="font-size:0.75rem; font-family:var(--font-display); color:var(--wax-red-bright); font-weight:bold;">' + (lockMessage || '🔒 Locked') + '</span>' 
+            : (q.claimed ? '<span class="quest-claimed-label">✔ Claimed</span>' : (q.completed ? '<button type="button" class="quest-claim-btn" data-action="claim-quest" data-id="' + q.id + '">Claim Reward</button>' : '<span style="font-size:0.75rem; font-family:var(--font-display); color:var(--parchment-muted);">In Progress</span>'))) +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderQuestsHTML() {
+    var normalLocked = (state.playerLevel < 5);
+    var hardLocked = (state.playerLevel < 10);
+
+    var normalCards = renderQuestCardsList(state.quests, normalLocked, '🔒 Unlocks at Level 5');
+    var hardCards = renderQuestCardsList(state.hardModeQuests, hardLocked, '🔒 Unlocks at Level 10');
+
+    return '<div class="quests-container">' +
+      '<div class="quests-header"><h2 class="quests-title">📜 Daily Quests</h2><span class="quests-date-badge">' + (normalLocked ? '🔒 Unlocks at Level 5' : ('Standard Mode &middot; ' + state.lastQuestDate)) + '</span></div>' +
+      (normalLocked ? '<div class="locked-reason-banner" style="margin-bottom:1rem;">🔒 Reach Player Level 5 to undertake Daily Quests</div>' : '') +
+      '<div class="quests-grid" style="margin-bottom:1.5rem;">' + normalCards + '</div>' +
+      '<div class="quests-header" style="border-top:1px dashed rgba(212,163,75,0.4); padding-top:1rem;"><h2 class="quests-title" style="color:var(--wax-red-bright);"><span style="color:var(--wax-red-bright);">💀</span> Hard Mode Quests</h2><span class="quests-date-badge">' + (hardLocked ? '🔒 Unlocks at Level 10' : 'Hard Mode Only &middot; Special Spoils') + '</span></div>' +
+      (hardLocked ? '<div class="locked-reason-banner" style="margin-bottom:1rem;">🔒 Reach Player Level 10 to undertake Hard Mode Quests</div>' : '') +
+      '<div class="quests-grid">' + hardCards + '</div>' +
+      '</div>';
+  }
+
+  function renderQuestsScreen() {
+    return '<div class="screen quests-screen"><div class="title-frame" style="min-height:auto; padding:2rem 1.5rem; max-width:960px;">' +
+      '<h1 class="game-title" style="margin-bottom:0.2rem;">Daily Decrees</h1>' +
+      '<p class="eyebrow" style="margin-bottom:1rem;">Daily Quests &amp; Realm Bounty</p>' +
+      '<div class="currency-bar">' +
+        '<div class="gold-badge">💰 Gold: ' + state.gold + '</div>' +
+        '<div class="gem-badge">💎 Gems: ' + state.gems + '</div>' +
+      '</div>' +
+      renderQuestsHTML() +
+      '<button type="button" class="primary-btn" style="margin-top:1rem;" data-action="go-title">Back to Title</button>' +
+      '</div></div>';
+  }
+
+  function renderAchievementsScreen() {
+    var filter = state.achieveFilter || 'all';
+    var categories = [
+      { id: 'all', label: 'All Feats' },
+      { id: 'battles', label: 'Battles Won' },
+      { id: 'hardMode', label: 'Hard Mode Clears' },
+      { id: 'attacks', label: 'Attack Techniques' },
+      { id: 'abilities', label: 'Passive Abilities' },
+      { id: 'quests', label: 'Quests Fulfilled' }
+    ];
+
+    var filterButtons = categories.map(function(c) {
+      return '<button type="button" class="filter-btn' + (filter === c.id ? ' active' : '') + '" data-action="filter-achieve" data-cat="' + c.id + '">' + c.label + '</button>';
+    }).join('');
+
+    var totalClaimed = Object.keys(state.claimedAchievements || {}).length;
+    var filteredList = ACHIEVEMENTS.filter(function(a) { return filter === 'all' || a.category === filter; });
+
+    var cardsHTML = filteredList.map(function(ach) {
+      var cur = getAchievementCurrentProgress(ach);
+      var isCompleted = cur >= ach.target;
+      var isClaimed = !!state.claimedAchievements[ach.id];
+      var pct = Math.min(100, Math.round((cur / ach.target) * 100));
+
+      var cardStatusClass = isClaimed ? 'claimed' : (isCompleted ? 'unlocked-ready' : 'locked');
+      var actionArea = '';
+      if (isClaimed) {
+        actionArea = '<span class="achieve-claimed-label">✔ Completed &amp; Claimed</span>';
+      } else if (isCompleted) {
+        actionArea = '<button type="button" class="achieve-claim-btn" data-action="claim-achievement" data-id="' + ach.id + '">Claim Reward</button>';
+      } else {
+        actionArea = '<span style="font-size:0.75rem; font-family:var(--font-display); color:var(--parchment-muted);">In Progress</span>';
+      }
+
+      return '<div class="achieve-card ' + cardStatusClass + '">' +
+        '<div class="achieve-card-top">' +
+          '<span class="achieve-cat-badge achieve-cat--' + ach.category + '">' + ach.tier + '</span>' +
+          '<div class="achieve-rewards">' +
+            '<span class="achieve-reward-gold">+' + ach.goldReward + 'g</span>' +
+'<span class="achieve-reward-gems">+' + ach.gemReward + '💎</span>' +
+          '</div>' +
+        '</div>' +
+        '<div style="font-family:var(--font-display); font-weight:bold; font-size:1.05rem; color:#fff; margin:0.2rem 0;">' + ach.name + '</div>' +
+        '<p class="achieve-desc">' + ach.desc + '</p>' +
+        '<div>' +
+          '<div class="achieve-progress-track"><div class="achieve-progress-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="achieve-progress-label"><span>Progress</span><span>' + cur + ' / ' + ach.target + '</span></div>' +
+        '</div>' +
+        '<div style="display:flex; justify-content:flex-end; align-items:center; min-height:28px;">' + actionArea + '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="screen achieve-screen"><div class="title-frame" style="min-height:auto; padding:2rem 1.5rem; max-width:960px;">' +
+      '<h1 class="game-title" style="margin-bottom:0.2rem;">Achievements</h1>' +
+      '<p class="eyebrow" style="margin-bottom:1rem;">Triumphs &amp; Hall of Records</p>' +
+      '<div class="currency-bar">' +
+        '<div class="gold-badge">💰 Gold: ' + state.gold + '</div>' +
+        '<div class="gem-badge">💎 Gems: ' + state.gems + '</div>' +
+      '</div>' +
+      '<div class="achievements-container">' +
+        '<div class="achievements-header">' +
+          '<h2 class="achievements-title">🏆 Feats of Mastery</h2>' +
+          '<span class="achieve-stats-badge">' + totalClaimed + ' / ' + ACHIEVEMENTS.length + ' Claimed</span>' +
+        '</div>' +
+        '<div class="achieve-filter-bar">' + filterButtons + '</div>' +
+        '<div class="achievements-grid">' + cardsHTML + '</div>' +
+      '</div>' +
+      '<button type="button" class="primary-btn" style="margin-top:1rem;" data-action="go-title">Back to Title</button>' +
+    '</div></div>';
+  }
+
+  function renderAltarScreen() {
+    var isAbilities = (state.altarTab === 'abilities');
+    var maxCount = isAbilities ? Object.keys(ABILITY_ENHANCEMENTS).length : Object.keys(ENHANCED_MOVES).length;
+    var currentCount = isAbilities ? Object.keys(state.unlockedAbilities || {}).length : Object.keys(state.unlockedEnhanced || {}).length;
+    var step = isAbilities ? (state.abilitySummonStep || 1) : (state.summonStep || 1);
+    var isCompleted = currentCount >= maxCount;
+    var currentDupeStreak = isAbilities ? (state.abilityDupeStreak || 0) : (state.dupeStreak || 0);
+
+    var stepNodes = [1, 2, 3, 4].map(function (s) {
+      var isActive = (step === s);
+      var isFree = (s === 4);
+      return '<div class="step-node' + (isActive ? ' active' : '') + (isFree ? ' free-step' : '') + '">' +
+        '<span class="step-title">Step ' + s + '</span>' +
+        '<span class="step-cost' + (isFree ? ' free' : '') + '">' + (isFree ? 'FREE' : '5 💎') + '</span>' +
+      '</div>';
+    }).join('');
+
+    var cost = (step === 4) ? 0 : 5;
+    var canSummon = !isCompleted && (cost === 0 || state.gems >= cost);
+
+    return '<div class="screen altar-screen"><div class="title-frame" style="min-height:auto; padding:2rem 1.5rem; max-width:760px;">' +
+      '<h1 class="game-title" style="margin-bottom:0.2rem;">Summon Altar</h1>' +
+      '<p class="eyebrow" style="margin-bottom:1rem;">Awaken Permanent Powers</p>' +
+      '<div class="currency-bar">' +
+        '<div class="gold-badge">💰 Gold: ' + state.gold + '</div>' +
+        '<div class="gem-badge">💎 Gems: ' + state.gems + '</div>' +
+      '</div>' +
+      '<div class="altar-banner-tabs">' +
+        '<button type="button" class="banner-tab-btn' + (!isAbilities ? ' active' : '') + '" data-action="set-altar-tab" data-tab="attacks">Technique Enhancements (' + Object.keys(state.unlockedEnhanced || {}).length + '/' + Object.keys(ENHANCED_MOVES).length + ')</button>' +
+        '<button type="button" class="banner-tab-btn' + (isAbilities ? ' active' : '') + '" data-action="set-altar-tab" data-tab="abilities">Ability Enhancements (' + Object.keys(state.unlockedAbilities || {}).length + '/' + Object.keys(ABILITY_ENHANCEMENTS).length + ')</button>' +
+      '</div>' +
+      '<div class="altar-pedestal">' +
+        (isCompleted ? '<div class="altar-completed-banner">🌟 All ' + (isAbilities ? 'Passive Abilities' : 'Techniques') + ' have been awakened!</div>' : '') +
+        '<div class="rotation-track">' + stepNodes + '</div>' +
+        '<div class="pity-streak-bar">Duplicate Protection Pity: <span class="pity-highlight">' + currentDupeStreak + ' / 3</span> (Guaranteed new pull at 3)</div>' +
+        '<div>' +
+          '<button type="button" class="primary-btn summon-btn-large" data-action="summon-click"' + (canSummon ? '' : ' disabled') + '>' +
+            (isCompleted ? 'Collection Complete' : (cost === 0 ? 'Claim Free Awakening' : 'Awaken (5 💎)')) +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      '<button type="button" class="primary-btn" data-action="go-title">Back to Title</button>' +
+    '</div></div>';
+  }
+
+  function renderShopScreen() {
+    return '<div class="screen shop-screen"><div class="title-frame" style="min-height:auto; padding:2rem 1.5rem; max-width:820px;">' +
+      '<h1 class="game-title" style="margin-bottom:0.2rem;">Arcane Apothecary</h1>' +
+      '<p class="eyebrow" style="margin-bottom:1rem;">Alchemical Battle Provisions</p>' +
+      '<div class="currency-bar">' +
+        '<div class="gold-badge">💰 Gold: ' + state.gold + '</div>' +
+        '<div class="gem-badge">💎 Gems: ' + state.gems + '</div>' +
+      '</div>' +
+      '<div class="shop-items-container">' +
+        '<div class="shop-item">' +
+          '<h3>Health Potion</h3>' +
+          '<p>Completely restores your active creature to full HP.</p>' +
+          '<div style="font-size:0.9rem; font-family:var(--font-display); font-weight:700; color:var(--gilt-bright); margin-bottom:0.8rem;">Owned: ' + (state.potions || 0) + '</div>' +
+          '<button type="button" class="primary-btn" data-action="buy-item" data-item="health"' + (state.gold >= 50 ? '' : ' disabled') + '>Buy (50g)</button>' +
+        '</div>' +
+        '<div class="shop-item">' +
+          '<h3>Attack Boost</h3>' +
+          '<p>Boosts attack power by +20% for 3 turns.</p>' +
+          '<div style="font-size:0.9rem; font-family:var(--font-display); font-weight:700; color:var(--gilt-bright); margin-bottom:0.8rem;">Owned: ' + (state.atkPotions || 0) + '</div>' +
+          '<button type="button" class="primary-btn" data-action="buy-item" data-item="attack"' + (state.gold >= 75 ? '' : ' disabled') + '>Buy (75g)</button>' +
+        '</div>' +
+        '<div class="shop-item">' +
+          '<h3>Shield Potion</h3>' +
+          '<p>Grants all active champions +35% damage mitigation for 3 turns.</p>' +
+          '<div style="font-size:0.9rem; font-family:var(--font-display); font-weight:700; color:var(--gilt-bright); margin-bottom:0.8rem;">Owned: ' + (state.shieldPotions || 0) + '</div>' +
+          '<button type="button" class="primary-btn" data-action="buy-item" data-item="shield"' + (state.gold >= 75 ? '' : ' disabled') + '>Buy (75g)</button>' +
+        '</div>' +
+        '<div class="shop-item">' +
+          '<h3>Energy Potion</h3>' +
+          '<p>Instantly refills active champion\'s Energy to 3 ◆.</p>' +
+          '<div style="font-size:0.9rem; font-family:var(--font-display); font-weight:700; color:var(--gilt-bright); margin-bottom:0.8rem;">Owned: ' + (state.energyPotions || 0) + '</div>' +
+          '<button type="button" class="primary-btn" data-action="buy-item" data-item="energy"' + (state.gold >= 80 ? '' : ' disabled') + '>Buy (80g)</button>' +
+        '</div>' +
+      '</div>' +
+      '<button type="button" class="primary-btn" style="margin-top:1.5rem;" data-action="go-title">Back to Title</button>' +
+    '</div></div>';
+  }
+
+  function renderIndexScreen() {
+    var filter = state.indexFilter || 'all';
+    var types = ['all', 'fire', 'water', 'grass', 'storm', 'earth', 'dark'];
+    var filterButtons = types.map(function(t) {
+      var label = t === 'all' ? 'All Creatures' : TYPE_META[t].label;
+      return '<button type="button" class="filter-btn' + (filter === t ? ' active' : '') + '" data-action="filter-index" data-type="' + t + '">' + label + '</button>';
+    }).join('');
+
+    var filteredCreatures = CREATURES.filter(function(c) { return filter === 'all' || c.type === filter; });
+    var cardsHTML = filteredCreatures.map(function(c) {
+      var bKey = c.id + '_basic', sKey = c.id + '_special', pKey = c.id + '_passive';
+      var bEnh = state.unlockedEnhanced && state.unlockedEnhanced[bKey];
+      var sEnh = state.unlockedEnhanced && state.unlockedEnhanced[sKey];
+      var pEnh = state.unlockedAbilities && state.unlockedAbilities[pKey];
+
+      var bData = ENHANCED_MOVES[bKey], sData = ENHANCED_MOVES[sKey], pData = ABILITY_ENHANCEMENTS[pKey];
+
+      return '<div class="index-card type-' + c.type + '">' +
+        '<div class="index-header">' +
+          '<div>' +
+            '<span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--parchment-muted);">' + TYPE_META[c.type].label + '</span>' +
+            '<h3 style="font-family:var(--font-display); font-size:1.35rem; margin:0.1rem 0; color:#fff;">' + c.name + '</h3>' +
+            '<span style="font-family:var(--font-display); font-size:0.85rem; color:#86efac;">HP: ' + c.maxHp + '</span>' +
+          '</div>' +
+          typeSeal(c.type, 38) +
+        '</div>' +
+        creatureModelHTML(c) +
+        '<div class="index-move-section">' +
+          '<div class="index-move-title"><span>Basic: ' + c.basic.name + ' (' + c.basic.dmg + ' dmg)</span><span class="status-pill ' + (bEnh ? 'unlocked' : 'locked') + '">' + (bEnh ? '★ Awakened' : 'Base') + '</span></div>' +
+          (bData ? '<div class="index-enh-preview ' + (bEnh ? 'unlocked' : 'locked') + '"><strong>' + (bEnh ? '★ Enhanced: ' : '🔒 Awakening: ') + '</strong>' + bData.dmg + ' dmg &middot; ' + bData.effectDesc + '</div>' : '') +
+        '</div>' +
+        '<div class="index-move-section">' +
+          '<div class="index-move-title"><span>Special: ' + c.special.name + ' (' + c.special.dmg + ' dmg &middot; ' + c.special.cost + '◆)</span><span class="status-pill ' + (sEnh ? 'unlocked' : 'locked') + '">' + (sEnh ? '★ Awakened' : 'Base') + '</span></div>' +
+          (sData ? '<div class="index-enh-preview ' + (sEnh ? 'unlocked' : 'locked') + '"><strong>' + (sEnh ? '★ Enhanced: ' : '🔒 Awakening: ') + '</strong>' + sData.dmg + ' dmg' + (sData.aoe ? ' (AOE)' : '') + ' &middot; ' + sData.effectDesc + '</div>' : '') +
+        '</div>' +
+        '<div class="index-move-section">' +
+          '<div class="index-move-title"><span>Passive: ' + (pEnh && pData ? pData.name : 'Inherent Power') + '</span><span class="status-pill ' + (pEnh ? 'unlocked' : 'locked') + '">' + (pEnh ? '★ Awakened' : 'Base') + '</span></div>' +
+          '<div style="font-size:0.85rem; color:var(--parchment-muted); line-height:1.35;">' + (pEnh && pData ? pData.desc : c.passiveDesc) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="screen index-screen"><div class="title-frame" style="min-height:auto; padding:2rem 1.5rem; max-width:1100px;">' +
+      '<h1 class="game-title" style="margin-bottom:0.2rem;">Bestiary Index</h1>' +
+      '<p class="eyebrow" style="margin-bottom:1rem;">Codex Archives &amp; Technique Codex</p>' +
+      '<div class="index-filter-bar">' + filterButtons + '</div>' +
+      '<div class="index-grid">' + cardsHTML + '</div>' +
+      '<button type="button" class="primary-btn" data-action="go-title">Back to Title</button>' +
+    '</div></div>';
+  }
+
+  function renderTitleScreen() {
+    var curLvl = state.playerLevel || 1;
+    var xpReq = getXpRequiredForLevel(curLvl);
+    var xpPct = Math.min(100, Math.round(((state.playerXp || 0) / xpReq) * 100));
+    var tierClass = getLevelTierClass(curLvl);
+    var lvl5Unlocked = curLvl >= 5;
+
+    return '<div class="screen title-screen"><div class="title-frame">' +
+      '<p class="eyebrow">A Mythic Card Battle</p>' +
+      '<h1 class="game-title">Codex Bestiarum</h1>' +
+      '<p class="title-blurb">Assemble an elite coven of mythical beasts and command the primordial elements to defeat the realm\'s guardian.</p>' +
+      '<div class="player-identity-bar">' +
+        '<div class="player-identity-top">' +
+          '<span class="level-badge ' + tierClass + '">Level ' + curLvl + '</span>' +
+          '<span class="player-name-highlight">' + (state.playerName || 'Champion') + '</span>' +
+          '<button type="button" class="edit-name-btn" data-action="open-name-modal">Rename</button>' +
+        '</div>' +
+        '<div class="player-xp-container">' +
+          '<div class="player-xp-track"><div class="player-xp-fill" style="width:' + xpPct + '%"></div></div>' +
+          '<div class="player-xp-label">XP: ' + (state.playerXp || 0) + ' / ' + xpReq + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="currency-bar">' +
+        '<div class="gold-badge">💰 Gold: ' + state.gold + '</div>' +
+        '<div class="gem-badge">💎 Gems: ' + state.gems + '</div>' +
+      '</div>' +
+      '<div class="title-buttons">' +
+        '<button type="button" class="primary-btn" style="font-size:1.25rem; padding:0.8em 2.4em;" data-action="go-difficulty">Enter Battle</button>' +
+        '<button type="button" class="primary-btn boss-btn-title" data-action="go-boss-select">👑 Challenge Titan: Godzilla</button>' +
+        '<div class="title-buttons-row">' +
+          '<button type="button" class="primary-btn" data-action="go-shop"' + (lvl5Unlocked ? '' : ' disabled title="Unlocks at Level 5"') + '>' + (lvl5Unlocked ? 'Apothecary Shop' : '🔒 Shop (Lvl 5)') + '</button>' +
+          '<button type="button" class="primary-btn" data-action="go-altar"' + (lvl5Unlocked ? '' : ' disabled title="Unlocks at Level 5"') + '>' + (lvl5Unlocked ? 'Summon Altar' : '🔒 Altar (Lvl 5)') + '</button>' +
+          '<button type="button" class="primary-btn" data-action="go-quests">Daily Decrees</button>' +
+          '<button type="button" class="primary-btn" data-action="go-achievements">Achievements</button>' +
+          '<button type="button" class="primary-btn" data-action="go-index">Bestiary Index</button>' +
+        '</div>' +
+        '<div class="title-buttons-row" style="margin-top:0.4rem;">' +
+          '<button type="button" class="primary-btn guide-btn" data-action="toggle-guide">Elemental Guide</button>' +
+          '<button type="button" class="primary-btn reset-btn-title" data-action="open-reset-modal">Reset Data</button>' +
+        '</div>' +
+      '</div>' +
+    '</div></div>';
+  }
+
+  function renderDifficultyScreen() {
+    var curLvl = state.playerLevel || 1;
+    var hardUnlocked = curLvl >= 10;
+
+    return '<div class="screen difficulty-screen"><div class="title-frame" style="min-height:auto; padding:2rem 1.5rem; max-width:860px;">' +
+      '<p class="eyebrow">Select Your Trial</p>' +
+      '<h1 class="game-title" style="margin-bottom:0.4rem;">Battle Crucible</h1>' +
+      '<p class="section-sub" style="margin-bottom:1rem;">Choose the difficulty for your forthcoming encounter.</p>' +
+      '<div class="difficulty-options">' +
+        '<div class="difficulty-card">' +
+          '<div>' +
+            '<div class="difficulty-card-header"><span class="diff-title">Standard Trial</span><span class="diff-badge normal">Normal</span></div>' +
+            '<p class="diff-desc">The traditional proving grounds of the Codex. Balanced adversaries and baseline rewards.</p>' +
+            '<ul class="diff-perks">' +
+              '<li>Standard bot combatants</li>' +
+              '<li>Balanced turn pace and movesets</li>' +
+              '<li>Unlocks Level XP, Gold, &amp; Gems</li>' +
+            '</ul>' +
+          '</div>' +
+          '<div>' +
+            '<div class="diff-rewards-box">Spoils: 25-50 Gold &bull; 1-3 Gems &bull; 105-130 XP</div>' +
+            '<button type="button" class="primary-btn" style="width:100%;" data-action="select-difficulty" data-diff="normal">Embark Normal</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="difficulty-card hard' + (hardUnlocked ? '' : ' locked-card') + '">' +
+          '<div>' +
+            '<div class="difficulty-card-header"><span class="diff-title">Mythic Trial</span><span class="diff-badge ' + (hardUnlocked ? 'hard' : 'locked') + '">' + (hardUnlocked ? 'Hard Mode' : 'Locked') + '</span></div>' +
+            '<p class="diff-desc">An unrelenting trial of true mastery. Adversaries command awakened techniques and relentless abilities.</p>' +
+            '<ul class="diff-perks">' +
+              '<li>Adversaries wield Awakened techniques</li>' +
+              '<li>Enemies possess Awakened passives</li>' +
+              '<li>Advanced tactical threat assessment</li>' +
+            '</ul>' +
+          '</div>' +
+          '<div>' +
+            (hardUnlocked ? '' : '<div class="locked-reason-banner">🔒 Requires Player Level 10</div>') +
+            '<div class="diff-rewards-box" style="border-color:var(--wax-red-bright); color:#fca5a5;">Spoils: 100-250 Gold &bull; 5-10 Gems &bull; 260-320 XP</div>' +
+            '<button type="button" class="primary-btn" style="width:100%;" data-action="select-difficulty" data-diff="hard"' + (hardUnlocked ? '' : ' disabled') + '>Embark Hard Mode</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<button type="button" class="primary-btn" data-action="go-title">Back to Title</button>' +
+    '</div></div>';
+  }
+
+  function renderSelectScreen() {
+    var atLimit = state.selectedIds.length >= 5;
+    var cards = CREATURES.map(function (c) {
+      return creatureCardHTML(c, state.selectedIds.indexOf(c.id) >= 0, atLimit);
+    }).join('');
+
+    return '<div class="screen" style="max-width:1100px;">' +
+      '<div class="battle-top-nav">' +
+        '<button type="button" class="battle-nav-btn guide-btn" data-action="toggle-guide">Elemental Guide</button>' +
+        '<button type="button" class="battle-nav-btn guide-btn" data-action="go-title">Main Menu</button>' +
+      '</div>' +
+      '<h1 class="section-title">' + (state.isBossFight ? 'Titan Vanguard Selection' : 'Party Selection') + '</h1>' +
+      '<p class="section-sub">Chosen Champions: <span class="count-badge">' + state.selectedIds.length + ' / 5</span>' + (state.isBossFight ? ' &middot; Prepare to face Godzilla (500 HP)!' : (state.difficulty === 'hard' ? ' &middot; [HARD MODE]' : '')) + '</p>' +
+      '<div class="creature-grid">' + cards + '</div>' +
+      '<button type="button" class="primary-btn" style="font-size:1.15rem; padding:0.8em 2.2em;" data-action="start-battle"' + (state.selectedIds.length === 5 ? '' : ' disabled') + '>Commence Contest</button>' +
+    '</div>';
+  }
+
+  function renderBattleScreen() {
+    var pActive = state.player.active, aActive = state.ai.active;
+
+    var pTokens = state.player.roster.map(function (c) { return partyTokenHTML(c, c === pActive); }).join('');
+    var aTokens = state.ai.roster.map(function (c) { return partyTokenHTML(c, c === aActive); }).join('');
+
+    var pickArea = '';
+    if (state.pendingChoice === 'initial-player') {
+      pickArea = '<div class="inline-pick-container"><h3 class="inline-pick-title">Select Your Lead Champion</h3><div class="inline-pick-grid">' +
+        state.player.roster.map(pickCardHTML).join('') + '</div></div>';
+    } else if (state.pendingChoice === 'replace-player') {
+      var alive = state.player.roster.filter(function (c) { return c.curHp > 0; });
+      pickArea = '<div class="inline-pick-container"><h3 class="inline-pick-title">Select Replacement Champion</h3><div class="inline-pick-grid">' +
+        alive.map(pickCardHTML).join('') + '</div></div>';
+    }
+
+    var logEntries = state.log.slice(-30).map(function (l) { return '<div class="log-entry">' + l + '</div>'; }).join('');
+
+    return '<div class="screen battle-screen">' +
+      '<div class="battle-top-nav">' +
+        '<button type="button" class="battle-nav-btn guide-btn" data-action="toggle-guide">Elemental Guide</button>' +
+        '<button type="button" class="battle-nav-btn forfeit-btn" data-action="open-forfeit">Surrender</button>' +
+      '</div>' +
+      '<div class="party-rosters-container">' +
+        '<div class="party-roster-group">' +
+          '<span class="roster-badge player-badge">' + (state.playerName || 'Champion') + '</span>' +
+          '<div class="party-row">' + pTokens + '</div>' +
+        '</div>' +
+        '<div class="party-roster-group">' +
+          '<span class="roster-badge ' + (state.isBossFight ? 'boss-badge' : (state.difficulty === 'hard' ? 'difficulty-indicator-badge' : 'enemy-badge')) + '">' +
+            (state.isBossFight ? 'Titan Godzilla' : (state.difficulty === 'hard' ? 'Hard Adversary' : 'The Mysterious Being')) +
+          '</span>' +
+          '<div class="party-row">' + aTokens + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="versus-area">' +
+        monPanelHTML(pActive) +
+        '<div class="vs-divider">VS</div>' +
+        monPanelHTML(aActive) +
+      '</div>' +
+      pickArea +
+      '<div class="battle-lower">' +
+        '<div class="action-bar' + (pActive ? ' type-' + pActive.template.type : '') + '">' + actionButtonsHTML() + '</div>' +
+        '<div class="battle-log-panel" id="battle-log-panel">' + logEntries + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderEndScreen() {
+    var win = state.winner === 'player';
+    var confettiHTML = '';
+    if (win) {
+      confettiHTML = '<div class="confetti-container">';
+      for (var i = 0; i < 40; i++) {
+        var left = Math.random() * 100;
+        var dur = 2.5 + Math.random() * 2;
+        var delay = Math.random() * 1.5;
+        var color = ['#d4a34b', '#fbbf24', '#22c55e', '#38bdf8', '#c084fc', '#ef4444'][Math.floor(Math.random() * 6)];
+        var size = 6 + Math.random() * 8;
+        confettiHTML += '<div class="confetti" style="left:' + left + 'vw; animation-duration:' + dur + 's; animation-delay:' + delay + 's; background-color:' + color + '; width:' + size + 'px; height:' + (size * 1.4) + 'px;"></div>';
+      }
+      confettiHTML += '</div>';
+    }
+
+    return '<div class="screen end-screen ' + (win ? 'victory' : 'defeat') + '">' +
+      confettiHTML +
+      '<h1 class="end-title">' + (win ? (state.isBossFight ? 'TITAN SLAIN!' : 'TRIUMPH!') : 'DEFEAT') + '</h1>' +
+      '<p class="end-sub">"' + state.endMessage + '"</p>' +
+      (win ? '<div class="rewards-wrapper">' +
+        '<div class="gold-reward">💰 +' + state.earnedGold + ' Gold</div>' +
+        '<div class="gem-reward">💎 +' + state.earnedGems + ' Gems</div>' +
+        '<div class="xp-reward">✨ +' + state.earnedXp + ' XP</div>' +
+      '</div>' : '') +
+      '<div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">' +
+        '<button type="button" class="primary-btn" data-action="play-again">Battle Crucible</button>' +
+        '<button type="button" class="primary-btn" data-action="go-title">Main Menu</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function render() {
+    var app = document.getElementById('app');
+    if (!app) return;
+
+    var storageBanner = state.storageError 
+      ? '<div class="storage-warning-banner">⚠️ Storage access disabled. Progress will not persist across browser sessions.</div>' 
+      : '';
+
+    var screenHTML = '';
+    switch (state.screen) {
+      case 'title': screenHTML = renderTitleScreen(); break;
+      case 'difficulty': screenHTML = renderDifficultyScreen(); break;
+      case 'select': screenHTML = renderSelectScreen(); break;
+      case 'battle': screenHTML = renderBattleScreen(); break;
+      case 'shop': screenHTML = renderShopScreen(); break;
+      case 'altar': screenHTML = renderAltarScreen(); break;
+      case 'quests': screenHTML = renderQuestsScreen(); break;
+      case 'achievements': screenHTML = renderAchievementsScreen(); break;
+      case 'index': screenHTML = renderIndexScreen(); break;
+      case 'end': screenHTML = renderEndScreen(); break;
+      default: screenHTML = renderTitleScreen(); break;
+    }
+
+    app.innerHTML = storageBanner + screenHTML + renderGuideModal() + renderForfeitModal() + renderResetModal() + renderNameModal() + renderItemsModal() + renderLevelUpModal() + renderBossUnlockModal() + renderSummonModal();
+
+    if (state.screen === 'battle') {
+      var logPanel = document.getElementById('battle-log-panel');
+      if (logPanel) logPanel.scrollTop = logPanel.scrollHeight;
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var target = e.target.closest('[data-action]');
+    if (!target) return;
+    var action = target.getAttribute('data-action');
+
+    switch (action) {
+      case 'go-title': state.screen = 'title'; state.isBossFight = false; render(); break;
+      case 'go-difficulty': state.screen = 'difficulty'; render(); break;
+      case 'select-difficulty':
+        state.difficulty = target.getAttribute('data-diff') || 'normal';
+        state.isBossFight = false;
+        state.selectedIds = [];
+        state.screen = 'select';
+        render();
+        break;
+      case 'go-boss-select':
+        state.isBossFight = true;
+        state.difficulty = 'normal';
+        state.selectedIds = [];
+        state.screen = 'select';
+        render();
+        break;
+      case 'go-shop': if (state.playerLevel >= 5) { state.screen = 'shop'; render(); } break;
+      case 'go-altar': if (state.playerLevel >= 5) { state.screen = 'altar'; render(); } break;
+      case 'go-quests': state.screen = 'quests'; render(); break;
+      case 'go-achievements': state.screen = 'achievements'; render(); break;
+      case 'go-index': state.screen = 'index'; render(); break;
+      case 'set-altar-tab': state.altarTab = target.getAttribute('data-tab'); render(); break;
+      case 'summon-click': performSummon(); break;
+      case 'close-summon-modal': state.recentSummon = null; render(); break;
+      case 'claim-quest': claimQuestReward(target.getAttribute('data-id')); break;
+      case 'claim-achievement': claimAchievementReward(target.getAttribute('data-id')); break;
+      case 'filter-achieve': state.achieveFilter = target.getAttribute('data-cat'); render(); break;
+      case 'filter-index': state.indexFilter = target.getAttribute('data-type'); render(); break;
+      case 'toggle-select': toggleSelect(target.getAttribute('data-id')); break;
+      case 'start-battle': startBattle(); break;
+      case 'pick-creature':
+        if (state.pendingChoice === 'initial-player') pickInitial(target.getAttribute('data-id'));
+        else if (state.pendingChoice === 'replace-player') pickReplacement(target.getAttribute('data-id'));
+        break;
+      case 'attack': playerAttack(target.getAttribute('data-move')); break;
+      case 'open-items': state.showItemsModal = true; render(); break;
+      case 'close-items': state.showItemsModal = false; render(); break;
+      case 'use-potion': usePotion(); break;
+      case 'use-atk-potion': useAtkPotion(); break;
+      case 'use-shield-potion': useShieldPotion(); break;
+      case 'use-energy-potion': useEnergyPotion(); break;
+      case 'buy-item':
+        var itype = target.getAttribute('data-item');
+        if (itype === 'health' && state.gold >= 50) { state.gold -= 50; state.potions = (state.potions || 0) + 1; saveGameData(); render(); }
+        else if (itype === 'attack' && state.gold >= 75) { state.gold -= 75; state.atkPotions = (state.atkPotions || 0) + 1; saveGameData(); render(); }
+        else if (itype === 'shield' && state.gold >= 75) { state.gold -= 75; state.shieldPotions = (state.shieldPotions || 0) + 1; saveGameData(); render(); }
+        else if (itype === 'energy' && state.gold >= 80) { state.gold -= 80; state.energyPotions = (state.energyPotions || 0) + 1; saveGameData(); render(); }
+        break;
+      case 'toggle-guide': state.showGuide = !state.showGuide; render(); break;
+      case 'open-forfeit': state.showForfeit = true; render(); break;
+      case 'forfeit-back': case 'close-forfeit': state.showForfeit = false; render(); break;
+      case 'forfeit-continue':
+        state.showForfeit = false;
+        state.winner = 'ai';
+        state.screen = 'end';
+        state.earnedGold = 0; state.earnedGems = 0; state.earnedXp = 0;
+        state.endMessage = 'You conceded the contest and surrendered the field.';
+        render();
+        break;
+      case 'open-reset-modal': state.showResetModal = true; render(); break;
+      case 'reset-back': case 'close-reset-modal': state.showResetModal = false; render(); break;
+      case 'reset-continue': state.showResetModal = false; resetProgress(); break;
+      case 'open-name-modal': state.showNameModal = true; render(); break;
+      case 'close-name-modal': state.showNameModal = false; render(); break;
+      case 'save-player-name':
+        var inp = document.getElementById('player-name-input');
+        if (inp) {
+          var val = inp.value.trim();
+          state.playerName = val.length > 0 ? val.slice(0, 20) : 'Champion';
+          saveGameData();
+        }
+        state.showNameModal = false;
+        render();
+        break;
+      case 'close-levelup-modal': state.levelUpModalData = null; render(); break;
+      case 'close-boss-unlock': state.bossUnlockModal = false; render(); break;
+      case 'play-again': playAgain(); break;
+    }
+  });
+
+  state = freshState();
+  render();
+})();
+</script>
+</body>
+</html>
